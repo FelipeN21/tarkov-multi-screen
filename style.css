@@ -1,0 +1,235 @@
+:root {
+  --bg: #0f1115;
+  --panel: #181b22;
+  --line: #2a2f3a;
+  --text: #e8eaf0;
+  --muted: #8b93a5;
+  --accent: #5b8cff;
+  --danger: #ff5b6b;
+  color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  background: var(--bg);
+  color: var(--text);
+  font: 15px/1.4 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+}
+
+[hidden] { display: none !important; }
+.muted { color: var(--muted); }
+.small { font-size: 13px; }
+
+button, input, select {
+  font: inherit;
+  color: inherit;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 8px 12px;
+}
+button { cursor: pointer; }
+button:hover { border-color: var(--accent); }
+button.primary { background: var(--accent); border-color: var(--accent); color: #fff; font-weight: 600; }
+button.danger { background: var(--danger); border-color: var(--danger); color: #fff; font-weight: 600; }
+
+/* Entrada */
+.card {
+  max-width: 380px;
+  margin: 12vh auto 0;
+  padding: 28px;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+.card h1 { margin: 0; }
+.card p { margin: 0; }
+.card label { display: flex; flex-direction: column; gap: 6px; color: var(--muted); }
+.card input { background: var(--bg); color: var(--text); }
+
+/* Barra superior */
+.bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 16px;
+  background: var(--panel);
+  border-bottom: 1px solid var(--line);
+}
+.bar label { display: flex; align-items: center; gap: 6px; color: var(--muted); font-size: 13px; }
+.bar label.check { cursor: pointer; }
+.title { font-size: 16px; }
+.spacer { flex: 1; }
+
+/* Conteúdo */
+.layout { display: flex; gap: 16px; padding: 16px; }
+aside {
+  width: 200px;
+  flex-shrink: 0;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 12px;
+  align-self: flex-start;
+}
+aside h2 { margin: 0 0 8px; font-size: 13px; text-transform: uppercase; letter-spacing: .05em; color: var(--muted); }
+#people { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 6px; }
+#people li { display: flex; align-items: center; gap: 6px; overflow-wrap: anywhere; }
+#people .live { color: var(--danger); font-size: 12px; font-weight: 600; }
+
+#grid {
+  flex: 1;
+  min-width: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 480px), 1fr));
+  gap: 16px;
+  align-content: start;
+}
+#empty { margin: 40px auto; }
+
+.tile {
+  position: relative;
+  aspect-ratio: 16 / 9;
+  background: #000;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  overflow: hidden;
+}
+.tile video { width: 100%; height: 100%; object-fit: contain; display: block; }
+.tile .label, .tile .stats {
+  position: absolute;
+  left: 8px;
+  padding: 3px 8px;
+  border-radius: 6px;
+  background: rgba(0, 0, 0, .65);
+  font-size: 12px;
+}
+.tile .label { top: 8px; font-weight: 600; }
+.tile .stats { bottom: 8px; font-variant-numeric: tabular-nums; color: #b9c0d0; white-space: pre-line; }
+.tile .stats:empty { display: none; }
+.tile .tools { position: absolute; top: 8px; right: 8px; display: flex; gap: 6px; opacity: 0; transition: opacity .15s; }
+.tile:hover .tools, .tile:focus-within .tools { opacity: 1; }
+.tile .tools button { padding: 4px 9px; background: rgba(0, 0, 0, .65); }
+.tile:fullscreen { border: 0; border-radius: 0; }
+
+#banner {
+  position: fixed;
+  left: 50%;
+  bottom: 20px;
+  transform: translateX(-50%);
+  max-width: calc(100% - 32px);
+  padding: 10px 16px;
+  background: var(--panel);
+  border: 1px solid var(--danger);
+  border-radius: 10px;
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+@media (max-width: 760px) {
+  .layout { flex-direction: column; padding: 16px; }
+  aside { width: 100%; }
+  .card { margin: 6vh 16px 0; }
+}
+
+/* ---------- Janela PiP ---------- */
+body.pip { min-height: 0; height: 100vh; overflow: hidden; background: #000; font-size: 13px; }
+.pip-stage { position: fixed; inset: 0; display: grid; gap: 2px; }
+.pip-cell {
+  position: relative;
+  min-width: 0;
+  min-height: 0;
+  overflow: hidden;
+  container-type: size;
+  display: grid;
+  place-items: center;
+  background: #000;
+  cursor: pointer;
+}
+/* A caixa tem a proporção da área visível e cabe inteira no quadro; o vídeo é ampliado e
+   deslocado dentro dela para mostrar só o recorte (--cx/--cy/--cw/--ch, frações da tela). */
+.pip-view {
+  position: relative;
+  overflow: hidden;
+  aspect-ratio: var(--ar);
+  width: min(100cqw, 100cqh * var(--ar));
+}
+.pip-view video {
+  position: absolute;
+  display: block;
+  max-width: none;
+  object-fit: fill;
+  width: calc(100% / var(--cw));
+  height: calc(100% / var(--ch));
+  left: calc(-100% * var(--cx) / var(--cw));
+  top: calc(-100% * var(--cy) / var(--ch));
+}
+.pip-label {
+  position: absolute;
+  left: 4px;
+  top: 4px;
+  padding: 1px 6px;
+  border-radius: 4px;
+  background: rgba(0, 0, 0, .6);
+  font-size: 11px;
+  font-weight: 600;
+  pointer-events: none;
+}
+.pip-tools { position: absolute; right: 4px; top: 4px; display: flex; gap: 4px; opacity: 0; transition: opacity .15s; }
+.pip-cell:hover .pip-tools { opacity: 1; }
+.pip-cell.cropping .pip-tools { display: none; }
+.pip-tools button, .pip-bar button { padding: 2px 8px; font-size: 12px; background: rgba(0, 0, 0, .7); }
+
+/* Barra de opções: só aparece com o mouse em cima da janela, para não atrapalhar no jogo. */
+.pip-bar {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 5;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  padding: 16px 6px 6px;
+  background: linear-gradient(transparent, rgba(0, 0, 0, .85));
+  opacity: 0;
+  transition: opacity .15s;
+  pointer-events: none;
+}
+body.pip:hover .pip-bar { opacity: 1; }
+.pip-bar button { pointer-events: auto; }
+.pip-bar button.on { background: var(--accent); border-color: var(--accent); color: #fff; }
+.pip-bar button.off { opacity: .5; text-decoration: line-through; }
+.pip-bar .sep { width: 1px; margin: 0 2px; background: var(--line); }
+.pip-chips { display: contents; }
+.pip-empty {
+  position: fixed;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  margin: 0;
+  padding: 16px;
+  text-align: center;
+  color: var(--muted);
+}
+
+.pip-crop {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  display: grid;
+  place-items: center;
+  background: rgba(0, 0, 0, .35);
+  cursor: crosshair;
+  touch-action: none;
+}
+.pip-crop span { padding: 2px 8px; border-radius: 4px; background: rgba(0, 0, 0, .7); font-size: 12px; pointer-events: none; }
+.pip-crop-box { position: absolute; border: 2px solid var(--accent); background: rgba(91, 140, 255, .15); pointer-events: none; }

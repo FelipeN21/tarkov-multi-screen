@@ -1,0 +1,96 @@
+# 📺 Tela
+
+Compartilhamento de tela entre amigos pelo navegador, com baixo atraso. Funciona direto do GitHub Pages, sem servidor.
+
+O vídeo vai **direto do seu PC para o PC de cada amigo** (WebRTC P2P). Para as pessoas da sala se encontrarem, o site usa o [Trystero](https://github.com/dmotz/trystero), que troca as mensagens de conexão por relays públicos Nostr. Essas mensagens são criptografadas com o nome da sala. Nenhum vídeo passa por esses relays.
+
+## Usar
+
+1. Abra o site, digite seu nome e o nome de uma sala.
+2. Clique em **Copiar link** e mande para os amigos.
+3. Clique em **Compartilhar tela**.
+
+## Janela PiP (telas dos amigos por cima do jogo)
+
+O botão **Abrir PiP** abre uma janela pequena que fica por cima de todos os programas, com as telas de quem está compartilhando. Funciona no **Chrome e no Edge** do computador.
+
+- **Abra antes de entrar no jogo.** Quando você troca de aba, o navegador pode abrir o PiP sozinho (como no Google Meet). Ao trocar de programa (Alt+Tab), ele não abre sozinho.
+- **O jogo precisa estar em modo sem bordas (Borderless / Janela sem bordas).** Nenhuma janela fica por cima de um jogo em tela cheia exclusiva.
+- Passe o mouse sobre o PiP para ver as opções:
+  - **Grade**, **Destaque** ou **Faixa**: como as telas ficam arrumadas. A Faixa fica boa numa janela larga e baixa, no topo do monitor.
+  - **Nomes**: clique para mostrar ou esconder alguém. A sua própria tela começa escondida.
+  - **Clique numa tela** para destacar ela; clique de novo para voltar.
+  - **✂ Recortar**: arraste sobre uma parte da tela de um amigo (ex.: a bússola) para ver só ela. **↺** volta a mostrar a tela inteira.
+  - **🔇/🔊**: liga e desliga o som daquele amigo.
+- O tamanho da janela, o layout, quem aparece e os recortes ficam salvos para a próxima vez.
+
+## Publicar no GitHub Pages
+
+1. Suba esta pasta para um repositório público.
+2. No repositório, vá em **Settings → Pages → Build and deployment**.
+3. Em **Source**, escolha *Deploy from a branch*, depois a branch `main` e a pasta `/ (root)`, e clique em **Save**.
+4. Em cerca de 1 minuto o site fica no ar em `https://SEU-USUARIO.github.io/NOME-DO-REPO/`.
+
+## Áudio
+
+- **Áudio**: o que vai junto depende do que você escolhe na hora de compartilhar.
+  - **Tela inteira**: todo o áudio do PC.
+  - **Janela**: só o áudio daquela janela.
+  - **Aba**: só o áudio da aba.
+
+  Na janela de escolha do navegador, deixe marcada a opção de compartilhar o áudio. O áudio de uma janela só funciona nas versões recentes do Chrome/Edge. Se o seu não suportar, o site avisa e a janela vai sem som; nesse caso, compartilhe a tela inteira.
+- **Áudio extra**: mistura outra entrada de áudio na transmissão.
+
+Quem assiste começa com o som desligado (regra dos navegadores). É só clicar no 🔊 do vídeo.
+
+### Áudio do TeamSpeak
+
+**Jeito simples:** compartilhe a **Tela inteira** com **Áudio do PC** ligado. O TeamSpeak já vai junto.
+
+**Jeito separado** (para compartilhar só uma janela, ou para controlar o TeamSpeak à parte):
+
+1. Instale o [VB-Cable](https://vb-audio.com/Cable/), que é grátis, e reinicie o PC.
+2. No TeamSpeak, vá em **Ferramentas → Opções → Reprodução** e escolha **CABLE Input** como dispositivo de saída.
+3. Para você continuar ouvindo o TeamSpeak, abra no Windows **Configurações de som → Mais configurações de som → Gravação**. Clique em **CABLE Output** → **Propriedades** → aba **Escutar**, marque **Escutar este dispositivo** e escolha seu fone.
+4. No site, em **Áudio extra**, escolha **CABLE Output**. Na primeira vez, o navegador pede permissão de microfone para mostrar os nomes dos dispositivos.
+
+Os controles de áudio valem a partir da próxima vez que você clicar em **Compartilhar tela**.
+
+## Rodar localmente
+
+Abrir o `index.html` direto pelo arquivo não funciona. Use qualquer servidor estático, por exemplo:
+
+```bash
+npx serve .
+```
+
+## Dicas para ter o menor atraso
+
+- Use **Chrome ou Edge**. São os que têm os ajustes de baixa latência e capturam o áudio do sistema.
+- Prefira cabo de rede a Wi-Fi, principalmente no PC de quem transmite.
+- Modo **Fluidez** para jogos e vídeos; modo **Nitidez** para texto e código.
+- Quem transmite envia uma cópia para cada amigo. Com muitos espectadores, baixe a qualidade (por exemplo, 5 amigos × 12 Mbps = 60 Mbps de upload).
+- Com todo mundo compartilhando ao mesmo tempo, use **Squad** (720p · 60 fps · 4 Mbps): com 4 pessoas, cada uma envia e recebe cerca de 12 Mbps. Se o upload de alguém não aguentar, essa pessoa usa **Leve** (720p · 30 fps · 2,5 Mbps).
+- Use o codec **H.264**. Ele é codificado pela placa de vídeo; os outros costumam ser codificados pelo processador, que já está ocupado com o jogo.
+- O canto do vídeo mostra fps, Mbps, ping e buffer. O atraso real fica em torno de ping/2 + buffer + ~30 ms de codificação/decodificação. **⚠ travou N×** indica que o vídeo congelou.
+- Na sua prévia aparece como a tela está saindo para cada amigo:
+  - **⚠ upload no limite**: sua internet não está dando conta. Baixe a qualidade ou use cabo.
+  - **⚠ PC sobrecarregado**: o computador não está dando conta de codificar. Use H.264, baixe a qualidade ou limite o FPS do jogo (deixar a placa de vídeo em 100% atrasa a captura e a codificação).
+- Placas NVIDIA têm um limite de codificações ao mesmo tempo. Gravação em segundo plano (ShadowPlay/Instant Replay), OBS e Discord ocupam vagas. Quando acaba a vaga, o navegador passa a codificar no processador e a transmissão fica travando.
+
+## Quando um amigo não consegue conectar
+
+Algumas redes (4G, redes de empresa ou faculdade) bloqueiam a conexão direta. Nesse caso você precisa de um servidor TURN, que retransmite o vídeo. Adicione-o em `RTC_CONFIG`, no começo do `app.js`:
+
+```js
+{ urls: 'turn:servidor:3478', username: 'usuario', credential: 'senha' }
+```
+
+Algumas opções são o Metered.ca (tem plano grátis), o Cloudflare Calls TURN ou um coturn próprio.
+
+## Arquivos
+
+- `index.html`, `style.css`: interface.
+- `app.js`: captura da tela, conexões WebRTC e ajustes de latência.
+- `pip.js`: janela PiP com layouts e recortes.
+- `vendor/trystero.js`: Trystero 0.26.0 (estratégia Nostr) empacotado num arquivo só, licença MIT.
