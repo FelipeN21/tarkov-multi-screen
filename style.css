@@ -66,6 +66,7 @@ button.danger { background: var(--danger); border-color: var(--danger); color: #
 .bar label { display: flex; align-items: center; gap: 6px; color: var(--muted); font-size: 13px; }
 .bar label.check { cursor: pointer; }
 .title { font-size: 16px; }
+.warn { color: #ffb84d; font-size: 13px; font-weight: 600; cursor: help; }
 .spacer { flex: 1; }
 
 /* Conteúdo */

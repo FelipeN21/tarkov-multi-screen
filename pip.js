@@ -56,14 +56,10 @@ export function connectPip(src, changed) {
 
 export const isPipOpen = () => !!win;
 
+// Pode falhar (ex.: sem clique do usuário); quem chama decide se mostra o erro.
 export async function openPip() {
   if (!pipSupported || win) return;
-  try {
-    win = await documentPictureInPicture.requestWindow({ width: settings.width, height: settings.height });
-  } catch (err) {
-    console.warn('PiP:', err);
-    return;
-  }
+  win = await documentPictureInPicture.requestWindow({ width: settings.width, height: settings.height });
   const doc = win.document;
   doc.title = 'Tela';
   for (const sheet of document.styleSheets) {

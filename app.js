@@ -52,8 +52,37 @@ function save(key, value) {
   try { localStorage.setItem('tela:' + key, value); } catch {}
 }
 
+const roomKey = (s) => s.trim().toLowerCase().replace(/\s+/g, '-').slice(0, 64);
+
+// Nome de sala aleatório difícil de adivinhar: 16 caracteres sem letras parecidas (0/o, 1/l/i),
+// ~79 bits. Sem senha, o nome da sala é o único segredo.
+function randomRoom() {
+  const abc = 'abcdefghjkmnpqrstuvwxyz23456789';
+  const bytes = crypto.getRandomValues(new Uint8Array(16));
+  const chars = [...bytes].map((b) => abc[b % abc.length]).join('');
+  return chars.match(/.{4}/g).join('-');
+}
+
+// A senha é "esticada" com PBKDF2 antes de virar chave. As mensagens criptografadas ficam em
+// relays públicos; sem isso, quem soubesse o nome da sala poderia testar bilhões de senhas por
+// segundo. Com 600 mil rodadas, cada tentativa custa o mesmo que 600 mil.
+async function stretchPassword(secret, roomName) {
+  const enc = new TextEncoder();
+  const base = await crypto.subtle.importKey('raw', enc.encode(secret), 'PBKDF2', false, ['deriveBits']);
+  const bits = await crypto.subtle.deriveBits(
+    { name: 'PBKDF2', hash: 'SHA-256', salt: enc.encode(APP_ID + ':' + roomName), iterations: 600_000 },
+    base,
+    256
+  );
+  return [...new Uint8Array(bits)].map((b) => b.toString(16).padStart(2, '0')).join('');
+}
+
 $('#name').value = load('name') || '';
-$('#room').value = decodeURIComponent(location.hash.slice(1)) || Math.random().toString(36).slice(2, 8);
+$('#room').value = decodeURIComponent(location.hash.slice(1)) || randomRoom();
+// A senha não vai no link; o site lembra a última usada em cada sala, só neste navegador.
+const fillPassword = () => ($('#password').value = load('pw:' + roomKey($('#room').value)) || '');
+fillPassword();
+$('#room').addEventListener('change', fillPassword);
 for (const id of ['quality', 'mode', 'codec']) {
   const v = load(id);
   if (v && [...$('#' + id).options].some((o) => o.value === v)) $('#' + id).value = v;
@@ -61,17 +90,36 @@ for (const id of ['quality', 'mode', 'codec']) {
 if (load('audio') === '0') $('#audio').checked = false;
 
 // ---------- entrar na sala ----------
-$('#join').addEventListener('submit', (e) => {
+$('#join').addEventListener('submit', async (e) => {
   e.preventDefault();
+  if (room) return;
   myName = $('#name').value.trim().slice(0, 32) || 'Anônimo';
-  const roomName = $('#room').value.trim().toLowerCase().replace(/\s+/g, '-').slice(0, 64);
+  const roomName = roomKey($('#room').value);
   if (!roomName) return;
+  const secret = $('#password').value;
   save('name', myName);
+  save('pw:' + roomName, secret);
   history.replaceState(null, '', '#' + encodeURIComponent(roomName));
 
-  // O nome da sala também é a senha: os relays não conseguem ler a negociação.
-  room = joinRoom({ appId: APP_ID, password: roomName, rtcConfig }, roomName, {
-    onJoinError: (err) => showBanner('Erro ao entrar na sala: ' + err.error, 'Recarregar', () => location.reload()),
+  // A negociação entre os PCs é criptografada com o nome da sala + a senha. Os relays não
+  // conseguem ler, e quem tiver a senha errada não consegue se conectar com ninguém da sala.
+  const joinBtn = $('#join button');
+  joinBtn.disabled = true;
+  joinBtn.textContent = 'Entrando…';
+  const password = secret ? await stretchPassword(secret, roomName) : roomName;
+  room = joinRoom({ appId: APP_ID, password, rtcConfig }, roomName, {
+    onJoinError: (err) => {
+      // Os dois lados recebem esse erro: quem errou a senha e quem já estava na sala.
+      if (/password/i.test(err.error)) {
+        showBanner(
+          'Alguém tentou se conectar com uma senha diferente da sua. Se quem errou foi você, recarregue a página e confira a senha.',
+          'OK',
+          () => ($('#banner').hidden = true)
+        );
+      } else {
+        showBanner('Erro ao entrar na sala: ' + err.error, 'Recarregar', () => location.reload());
+      }
+    },
   });
   stateAction = room.makeAction('state');
   sigAction = room.makeAction('sig');
@@ -84,14 +132,16 @@ $('#join').addEventListener('submit', (e) => {
   people.set(myId, { name: myName, sharing: false });
   renderPeople();
 
-  $('#roomName').textContent = roomName;
+  $('#roomName').textContent = roomName + (secret ? ' 🔒' : '');
+  $('#roomName').title = secret ? 'Sala com senha' : '';
+  $('#noPassword').hidden = !!secret;
   $('#join').hidden = true;
   $('#app').hidden = false;
 
   // Ao trocar de aba, o Chrome pode abrir o PiP sozinho (como no Google Meet).
   try {
     navigator.mediaSession.setActionHandler('enterpictureinpicture', () => {
-      if ([...tiles.keys()].some((id) => id !== 'me')) openPip();
+      if ([...tiles.keys()].some((id) => id !== 'me')) openPip().catch((err) => console.warn('PiP:', err));
     });
   } catch {}
 
@@ -599,11 +649,22 @@ const toggleSound = (id) => {
   t?.setMuted?.(!t.video.muted);
 };
 connectPip({ screens: pipScreens, toggleSound }, updatePipButton);
-$('#pip').addEventListener('click', () => (isPipOpen() ? closePip() : openPip()));
-if (!pipSupported) {
-  $('#pip').disabled = true;
-  $('#pip').title = 'Seu navegador não tem a janela PiP. Use Chrome ou Edge no computador.';
-}
+$('#pip').addEventListener('click', async () => {
+  if (isPipOpen()) return closePip();
+  const hide = () => ($('#banner').hidden = true);
+  if (!pipSupported) {
+    return showBanner(
+      'Este navegador não tem a janela PiP. Use Chrome ou Edge (versão 116 ou mais nova) no computador. Firefox, Opera, Opera GX e Safari não têm.',
+      'OK',
+      hide
+    );
+  }
+  try {
+    await openPip();
+  } catch (err) {
+    showBanner('Não foi possível abrir o PiP: ' + err.message, 'OK', hide);
+  }
+});
 
 function renderPeople() {
   const ul = $('#people');
@@ -624,7 +685,7 @@ function renderPeople() {
 $('#copy').addEventListener('click', async () => {
   try {
     await navigator.clipboard.writeText(location.href);
-    $('#copy').textContent = 'Link copiado!';
+    $('#copy').textContent = $('#password').value ? 'Link copiado! Mande a senha à parte' : 'Link copiado!';
   } catch {
     prompt('Copie o link:', location.href);
   }

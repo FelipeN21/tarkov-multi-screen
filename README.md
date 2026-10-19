@@ -6,9 +6,25 @@ O vídeo vai **direto do seu PC para o PC de cada amigo** (WebRTC P2P). Para as 
 
 ## Usar
 
-1. Abra o site, digite seu nome e o nome de uma sala.
-2. Clique em **Copiar link** e mande para os amigos.
+1. Abra o site, digite seu nome, o nome de uma sala e, se quiser, uma **senha**.
+2. Clique em **Copiar link** e mande para os amigos. A senha não vai no link: mande ela por outro meio.
 3. Clique em **Compartilhar tela**.
+
+### Senha da sala
+
+Sem senha, qualquer pessoa que souber o nome da sala entra. Com senha, a negociação entre os PCs é criptografada com o nome da sala + a senha. Quem digitar uma senha diferente não consegue se conectar com ninguém e vê um aviso. O mesmo aviso aparece para quem já está na sala quando alguém tenta entrar com a senha errada. A sala com senha mostra um 🔒 ao lado do nome.
+
+Antes de virar chave, a senha passa por PBKDF2 (600 mil rodadas). Isso deixa cada tentativa de adivinhar a senha muito mais cara para quem copiar as mensagens criptografadas dos relays públicos. Mesmo assim, use uma senha boa: 3 ou 4 palavras aleatórias ou 12+ caracteres. Todos na sala precisam estar com a versão atual do site; se alguém estiver com uma versão antiga em cache, aparece o aviso de senha diferente (resolve com Ctrl+F5).
+
+Sem senha, o nome da sala é o único segredo. Por isso o nome sugerido é aleatório e longo (ex.: `k3fp-x2qm-7hzw-a9rd`), e a barra de cima mostra **⚠ Sala sem senha**.
+
+O site lembra a última senha usada em cada sala, só no seu navegador.
+
+### Cuidados
+
+- Compartilhe a **janela do jogo** em vez da tela inteira: a tela inteira mostra notificações, mensagens e o que você digitar em outros programas.
+- Todos na sala veem o IP público uns dos outros (o vídeo vai direto de PC para PC). Só entre em salas com quem você conhece.
+- Ative a verificação em duas etapas na conta do GitHub que publica o site: quem controla a conta controla o código.
 
 ## Janela PiP (telas dos amigos por cima do jogo)
 

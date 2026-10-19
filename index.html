@@ -17,13 +17,17 @@
     <label>Sala
       <input id="room" maxlength="64" required>
     </label>
+    <label>Senha da sala <span class="small">(opcional)</span>
+      <input id="password" type="password" maxlength="64" autocomplete="off" placeholder="Combine com os amigos">
+    </label>
     <button class="primary" type="submit">Entrar</button>
-    <p class="muted small">Quem entrar na mesma sala vê as telas compartilhadas.</p>
+    <p class="muted small">Quem entrar na mesma sala vê as telas compartilhadas. Com senha, todos precisam digitar a mesma. Ela não vai no link: mande por outro meio.</p>
   </form>
 
   <main id="app" hidden>
     <header class="bar">
       <strong class="title">📺 Sala <span id="roomName"></span></strong>
+      <span id="noPassword" class="warn" title="Quem souber o nome da sala entra e vê sua tela. Para usar senha, recarregue a página e preencha o campo Senha." hidden>⚠ Sala sem senha</span>
       <button id="copy" type="button">Copiar link</button>
       <div class="spacer"></div>
       <label>Qualidade
