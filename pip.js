@@ -8,7 +8,7 @@ export const pipSupported = 'documentPictureInPicture' in window;
 const LAYOUTS = { grid: '▦ Grade', focus: '◧ Destaque', strip: '▬ Faixa' };
 const NO_CROP = { x: 0, y: 0, w: 1, h: 1 };
 
-let source = { screens: () => [], toggleSound: () => {} };
+let source = { screens: () => [], toggleSound: () => {}, setVolume: () => {} };
 let onChange = () => {};
 let win = null;
 let els = null; // elementos fixos da janela: barra, palco, aviso
@@ -48,7 +48,7 @@ function h(tag, cls, text) {
 }
 
 // ---------- abrir / fechar ----------
-// source.screens() devolve [{ id, name, stream, muted, self }]; muted é null quando não há som.
+// source.screens() devolve [{ id, name, stream, muted, volume, self }]; muted é null quando não há som.
 export function connectPip(src, changed) {
   source = src;
   onChange = changed;
@@ -164,8 +164,9 @@ function updateCell(s) {
   c.key = keyOf(s);
   c.label.textContent = nameOf(s);
   if (c.video.srcObject !== s.stream) c.video.srcObject = s.stream;
-  c.soundBtn.hidden = s.muted == null;
+  c.soundBtn.hidden = c.volume.hidden = s.muted == null;
   c.soundBtn.textContent = s.muted ? '🔇' : '🔊';
+  c.volume.value = s.volume;
   applyCrop(c);
 }
 
@@ -181,14 +182,20 @@ function makeCell(id) {
   const tools = h('div', 'pip-tools');
   const soundBtn = h('button', '', '🔇');
   soundBtn.title = 'Ligar/desligar som';
+  const volume = h('input');
+  volume.type = 'range';
+  volume.min = 0;
+  volume.max = 1;
+  volume.step = 0.05;
+  volume.title = 'Volume';
   const cropBtn = h('button', '', '✂');
   cropBtn.title = 'Recortar: arraste sobre a área que quer ver (Esc cancela)';
   const resetBtn = h('button', '', '↺');
   resetBtn.title = 'Voltar a mostrar a tela inteira';
-  tools.append(soundBtn, cropBtn, resetBtn);
+  tools.append(soundBtn, volume, cropBtn, resetBtn);
   el.append(view, label, tools);
 
-  const c = { id, el, view, video, label, soundBtn, resetBtn, key: '' };
+  const c = { id, el, view, video, label, soundBtn, volume, resetBtn, key: '' };
   cells.set(id, c);
 
   video.addEventListener('resize', () => applyCrop(c)); // resolução do amigo mudou
@@ -196,6 +203,8 @@ function makeCell(id) {
     e.stopPropagation();
     source.toggleSound(id);
   };
+  volume.oninput = () => source.setVolume(id, +volume.value);
+  volume.onclick = (e) => e.stopPropagation(); // não destacar a tela ao mexer no volume
   cropBtn.onclick = (e) => {
     e.stopPropagation();
     startCrop(c);

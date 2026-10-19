@@ -588,6 +588,7 @@ function makeTile(id, label, withSound) {
   el.innerHTML =
     '<video autoplay playsinline muted></video><div class="label"></div><div class="stats"></div>' +
     '<div class="tools"><button data-a="sound" title="Ligar/desligar som">🔇</button>' +
+    '<input data-a="vol" type="range" min="0" max="1" step="0.05" title="Volume">' +
     '<button data-a="full" title="Tela cheia">⛶</button></div>';
   t = {
     el,
@@ -597,16 +598,33 @@ function makeTile(id, label, withSound) {
   };
   t.label.textContent = label;
   const soundBtn = el.querySelector('[data-a="sound"]');
+  const slider = el.querySelector('[data-a="vol"]');
   t.withSound = withSound;
   if (withSound) {
+    // Volume salvo por nome, para valer nas próximas vezes. O som começa desligado (regra dos
+    // navegadores); mexer no volume já liga.
+    const volKey = () => 'vol:' + (people.get(id)?.name || '').trim().toLowerCase();
+    const saved = parseFloat(load(volKey()));
+    t.video.volume = slider.value = Number.isFinite(saved) ? saved : 1;
     t.setMuted = (muted) => {
+      if (!muted && t.video.volume === 0) t.setVolume(1);
       t.video.muted = muted;
       soundBtn.textContent = muted ? '🔇' : '🔊';
       refreshPip();
     };
+    t.setVolume = (v) => {
+      t.video.volume = v;
+      slider.value = v;
+      save(volKey(), v);
+      if (v > 0 && t.video.muted) t.setMuted(false);
+      else if (v === 0 && !t.video.muted) t.setMuted(true);
+      else refreshPip();
+    };
     soundBtn.addEventListener('click', () => t.setMuted(!t.video.muted));
+    slider.addEventListener('input', () => t.setVolume(+slider.value));
   } else {
     soundBtn.remove();
+    slider.remove();
   }
   const toggleFull = () => (document.fullscreenElement ? document.exitFullscreen() : el.requestFullscreen());
   el.querySelector('[data-a="full"]').addEventListener('click', toggleFull);
@@ -638,6 +656,7 @@ function pipScreens() {
     name: id === 'me' ? 'Você' : people.get(id)?.name || '?',
     stream: t.video.srcObject,
     muted: t.withSound ? t.video.muted : null,
+    volume: t.video.volume,
     self: id === 'me',
   }));
   return [...list.filter((s) => !s.self), ...list.filter((s) => s.self)];
@@ -648,7 +667,8 @@ const toggleSound = (id) => {
   const t = tiles.get(id);
   t?.setMuted?.(!t.video.muted);
 };
-connectPip({ screens: pipScreens, toggleSound }, updatePipButton);
+const setVolume = (id, v) => tiles.get(id)?.setVolume?.(v);
+connectPip({ screens: pipScreens, toggleSound, setVolume }, updatePipButton);
 $('#pip').addEventListener('click', async () => {
   if (isPipOpen()) return closePip();
   const hide = () => ($('#banner').hidden = true);

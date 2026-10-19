@@ -37,7 +37,7 @@ O botão **Abrir PiP** abre uma janela pequena que fica por cima de todos os pro
   - **Nomes**: clique para mostrar ou esconder alguém. A sua própria tela começa escondida.
   - **Clique numa tela** para destacar ela; clique de novo para voltar.
   - **✂ Recortar**: arraste sobre uma parte da tela de um amigo (ex.: a bússola) para ver só ela. **↺** volta a mostrar a tela inteira.
-  - **🔇/🔊**: liga e desliga o som daquele amigo.
+  - **🔇/🔊 e barra de volume**: liga, desliga e ajusta o som daquele amigo.
 - O tamanho da janela, o layout, quem aparece e os recortes ficam salvos para a próxima vez.
 
 ## Publicar no GitHub Pages
@@ -57,7 +57,7 @@ O botão **Abrir PiP** abre uma janela pequena que fica por cima de todos os pro
   Na janela de escolha do navegador, deixe marcada a opção de compartilhar o áudio. O áudio de uma janela só funciona nas versões recentes do Chrome/Edge. Se o seu não suportar, o site avisa e a janela vai sem som; nesse caso, compartilhe a tela inteira.
 - **Áudio extra**: mistura outra entrada de áudio na transmissão.
 
-Quem assiste começa com o som desligado (regra dos navegadores). É só clicar no 🔊 do vídeo.
+Quem assiste começa com o som desligado (regra dos navegadores). Passe o mouse sobre o vídeo e clique no 🔇 ou mexa na barra de volume. O volume de cada amigo fica salvo para as próximas vezes.
 
 ### Áudio do TeamSpeak
 
