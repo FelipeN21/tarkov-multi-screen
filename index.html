@@ -77,9 +77,33 @@
         </div>
       </details>
 
+      <button id="itemsBtn" type="button" class="ghost" title="Buscar preços de itens">🔎 Itens</button>
       <button id="pip" type="button" class="ghost" title="Abre uma janela por cima dos outros programas com as telas dos amigos. Abra antes de entrar no jogo (o jogo precisa estar em modo sem bordas/Borderless).">Abrir PiP</button>
       <button id="share" class="primary" type="button">Compartilhar tela</button>
     </header>
+
+    <div id="itemsPanel" class="drawer" role="dialog" aria-label="Busca de itens" hidden>
+      <div class="drawer-head">
+        <h2>Busca de itens</h2>
+        <button id="itemsClose" type="button" class="icon" title="Fechar (Esc)">✕</button>
+      </div>
+      <div class="tabs" role="tablist">
+        <button type="button" class="tab on" role="tab" aria-selected="true">Escape from Tarkov</button>
+      </div>
+      <form id="itemSearch" class="search">
+        <input id="itemQuery" maxlength="60" placeholder="Nome do item (ex.: ledx, gpu, salewa)" autocomplete="off" spellcheck="false">
+        <button class="primary" type="submit">Buscar</button>
+      </form>
+      <div class="search-opts">
+        <div id="itemMode" class="seg" title="Os preços do PvE são separados">
+          <button type="button" data-mode="regular">PvP</button>
+          <button type="button" data-mode="pve">PvE</button>
+        </div>
+        <span id="itemStatus" class="item-status">Digite parte do nome e aperte Enter.</span>
+      </div>
+      <ul id="itemResults" class="results"></ul>
+      <p class="drawer-foot">Preços da <a href="https://tarkov.dev" target="_blank" rel="noopener noreferrer">tarkov.dev</a> · atualizados a cada poucos minutos</p>
+    </div>
 
     <div class="layout">
       <aside>
@@ -94,5 +118,6 @@
 
   <div id="banner" hidden></div>
   <script type="module" src="app.js"></script>
+  <script type="module" src="items.js"></script>
 </body>
 </html>

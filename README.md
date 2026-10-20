@@ -47,6 +47,16 @@ O botão **Abrir PiP** abre uma janela pequena que fica por cima de todos os pro
 3. Em **Source**, escolha *Deploy from a branch*, depois a branch `main` e a pasta `/ (root)`, e clique em **Save**.
 4. Em cerca de 1 minuto o site fica no ar em `https://SEU-USUARIO.github.io/NOME-DO-REPO/`.
 
+## Busca de preços (Escape from Tarkov)
+
+O botão **🔎 Itens** abre um painel para consultar o preço de um item sem sair da sala.
+
+- Digite parte do nome, em inglês ou português (ex.: `ledx`, `gpu`, `salewa`, `transiluminador`), e aperte **Enter**.
+- Para cada item aparecem a menor oferta atual no mercado (com a variação em 48 h), a média de 24 h, quanto o melhor comerciante paga e, em itens com mais de um slot, o valor por slot. O nome leva para a wiki.
+- **PvP / PvE**: os preços do PvE são separados.
+
+Os dados vêm dos arquivos públicos da [tarkov.dev](https://tarkov.dev), os mesmos que o site deles usa. A API GraphQL da tarkov.dev estava fora do ar quando isto foi feito. A lista (~2 MB) é baixada uma vez quando você abre o painel, e a busca roda no seu navegador: digitar e buscar não fazem novas requisições, e a lista só é baixada de novo depois de 10 minutos. Esses arquivos não têm documentação oficial; se mudarem, o painel avisa que não conseguiu baixar os preços.
+
 ## Áudio
 
 - **Áudio**: o que vai junto depende do que você escolhe na hora de compartilhar.
@@ -109,4 +119,5 @@ Algumas opções são o Metered.ca (tem plano grátis), o Cloudflare Calls TURN 
 - `index.html`, `style.css`: interface.
 - `app.js`: captura da tela, conexões WebRTC e ajustes de latência.
 - `pip.js`: janela PiP com layouts e recortes.
+- `items.js`: busca de preços de itens do Escape from Tarkov.
 - `vendor/trystero.js`: Trystero 0.26.0 (estratégia Nostr) empacotado num arquivo só, licença MIT.
