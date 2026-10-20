@@ -47,6 +47,12 @@ O botão **Abrir PiP** abre uma janela pequena que fica por cima de todos os pro
 3. Em **Source**, escolha *Deploy from a branch*, depois a branch `main` e a pasta `/ (root)`, e clique em **Save**.
 4. Em cerca de 1 minuto o site fica no ar em `https://SEU-USUARIO.github.io/NOME-DO-REPO/`.
 
+## Busca rápida (Ctrl+K)
+
+Dentro da sala, **Ctrl+K** (ou a lupa no grupo *Tarkov* da barra) abre uma busca única: digite parte do nome e aparecem mapas, itens (com o preço), tarefas (com o trader) e o atalho para o perfil de um jogador. Use **↑ ↓** e **Enter**, ou clique: o painel certo abre já com a busca feita. A filtragem roda no navegador, em cima das mesmas listas dos painéis; digitar não faz requisições.
+
+A versão do site aparece no rodapé da entrada, nos Ajustes e na janela **Sobre** (atalhos e créditos). Se ela não bater com a dos amigos, aperte Ctrl+F5.
+
 ## Busca de preços (Escape from Tarkov)
 
 O botão **🔎 Itens** abre um painel para consultar o preço de um item sem sair da sala.
@@ -154,4 +160,6 @@ Algumas opções são o Metered.ca (tem plano grátis), o Cloudflare Calls TURN 
 - `tasks.js`: busca de tarefas (o que fazer e itens necessários).
 - `tarkov-data.js`: partes comuns dos painéis do Escape from Tarkov.
 - `maps.js` e `maps/`: mapas com as extrações.
+- `palette.js`: busca rápida (Ctrl+K).
+- `icons.js` e `logo.svg`: ícones e logo.
 - `vendor/trystero.js`: Trystero 0.26.0 (estratégia Nostr) empacotado num arquivo só, licença MIT.

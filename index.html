@@ -4,13 +4,16 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Tela</title>
-  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📺</text></svg>">
+  <link rel="icon" href="logo.svg" type="image/svg+xml">
   <link rel="stylesheet" href="style.css">
+  <!-- Aplica o tema salvo antes de desenhar a página (o escuro é o padrão). -->
+  <script>try { if (localStorage.getItem('tela:theme') === 'light') document.documentElement.dataset.theme = 'light'; } catch {}</script>
 </head>
 <body>
+  <button type="button" class="theme-toggle join-theme" title="Alternar tema claro/escuro" aria-label="Alternar tema claro/escuro"></button>
   <form id="join" class="card">
     <div class="brand">
-      <span class="logo">📺</span>
+      <img class="logo" src="logo.svg" alt="">
       <div>
         <h1>Tela</h1>
         <p class="muted">Compartilhe a tela com os amigos, com o mínimo de atraso.</p>
@@ -22,26 +25,39 @@
     <label>Sala
       <input id="room" maxlength="64" required spellcheck="false">
     </label>
-    <label><span>Senha da sala <span class="optional">opcional</span></span>
+    <label><span>Senha da sala <span class="optional">opcional</span> <span class="tip" title="Com senha, todos precisam digitar a mesma. Ela não vai no link: mande por outro meio."><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx='12' cy='12' r='10'/><path d='M12 16v-4M12 8h.01'/></svg></span></span>
       <input id="password" type="password" maxlength="64" autocomplete="off" placeholder="Combine com os amigos">
     </label>
     <button class="primary" type="submit">Entrar</button>
-    <p class="hint">Quem entrar na mesma sala vê as telas compartilhadas. Com senha, todos precisam digitar a mesma. Ela não vai no link: mande por outro meio.</p>
+    <p class="hint">Todos na mesma sala veem as telas compartilhadas.</p>
   </form>
+  <footer id="joinFooter" class="join-footer">
+    <span>Versão <span class="app-version"></span></span> · <button type="button" class="link about-open">Sobre</button>
+  </footer>
 
   <main id="app" hidden>
     <header class="bar">
-      <span class="logo small-logo">📺</span>
+      <img class="logo small-logo" src="logo.svg" alt="">
       <div class="room">
         <span class="room-label">Sala</span>
         <strong id="roomName" class="room-name"></strong>
       </div>
-      <span id="noPassword" class="warn" title="Quem souber o nome da sala entra e vê sua tela. Para usar senha, recarregue a página e preencha o campo Senha." hidden>⚠ Sem senha</span>
-      <button id="copy" type="button" class="ghost">Copiar link</button>
+      <span id="noPassword" class="warn" title="Quem souber o nome da sala entra e vê sua tela. Para usar senha, recarregue a página e preencha o campo Senha." hidden><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d='M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z'/><path d='M12 9v4M12 17h.01'/></svg> Sem senha</span>
+      <button id="copy" type="button" class="ghost icon-btn" title="Copiar o link da sala" aria-label="Copiar o link da sala"></button>
       <div class="spacer"></div>
+      <nav class="toolgroup" aria-label="Ferramentas do Escape from Tarkov">
+        <span class="toolgroup-label">Tarkov</span>
+        <button id="paletteBtn" type="button" class="ghost icon-btn" title="Busca rápida (Ctrl+K)" aria-label="Busca rápida"></button>
+        <button id="itemsBtn" type="button" class="ghost drawer-btn" title="Preços de itens"><span class="lbl">Itens</span></button>
+        <button id="playersBtn" type="button" class="ghost drawer-btn" title="Perfil de um jogador"><span class="lbl">Players</span></button>
+        <button id="tasksBtn" type="button" class="ghost drawer-btn" title="Tarefas: o que fazer e itens necessários"><span class="lbl">Tasks</span></button>
+        <button id="mapsBtn" type="button" class="ghost drawer-btn" title="Mapas com as extrações"><span class="lbl">Mapas</span></button>
+      </nav>
+      <button id="pip" type="button" class="ghost" title="Abre uma janela por cima dos outros programas com as telas dos amigos. Abra antes de entrar no jogo (o jogo precisa estar em modo sem bordas/Borderless).">Abrir PiP</button>
+      <button type="button" class="ghost icon-btn theme-toggle" title="Alternar tema claro/escuro" aria-label="Alternar tema claro/escuro"></button>
 
       <details class="settings">
-        <summary>⚙ Ajustes</summary>
+        <summary class="icon-btn" title="Ajustes da transmissão" aria-label="Ajustes da transmissão"></summary>
         <div class="settings-panel">
           <label>Qualidade
             <select id="quality">
@@ -74,21 +90,17 @@
             <input type="checkbox" id="audio" checked> Enviar áudio junto com a tela
           </label>
           <p class="hint">Áudio e áudio extra valem a partir da próxima vez que você compartilhar.</p>
+          <p class="settings-foot">Versão <span class="app-version"></span> · <button type="button" class="link about-open">Sobre</button> · <kbd>Ctrl</kbd>+<kbd>K</kbd> busca rápida</p>
         </div>
       </details>
 
-      <button id="itemsBtn" type="button" class="ghost drawer-btn" title="Buscar preços de itens">🔎 Itens</button>
-      <button id="playersBtn" type="button" class="ghost drawer-btn" title="Abrir o perfil de um jogador">👤 Players</button>
-      <button id="tasksBtn" type="button" class="ghost drawer-btn" title="O que fazer em cada tarefa e os itens necessários">📋 Tasks</button>
-      <button id="mapsBtn" type="button" class="ghost drawer-btn" title="Mapas com as extrações">🗺️ Mapas</button>
-      <button id="pip" type="button" class="ghost" title="Abre uma janela por cima dos outros programas com as telas dos amigos. Abra antes de entrar no jogo (o jogo precisa estar em modo sem bordas/Borderless).">Abrir PiP</button>
       <button id="share" class="primary" type="button">Compartilhar tela</button>
     </header>
 
     <div id="itemsPanel" class="drawer" role="dialog" aria-label="Busca de itens" hidden>
       <div class="drawer-head">
         <h2>Busca de itens</h2>
-        <button id="itemsClose" type="button" class="icon" title="Fechar (Esc)">✕</button>
+        <button id="itemsClose" type="button" class="icon" title="Fechar (Esc)" aria-label="Fechar"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d='M18 6 6 18M6 6l12 12'/></svg></button>
       </div>
       <div class="tabs" role="tablist">
         <button type="button" class="tab on" role="tab" aria-selected="true">Escape from Tarkov</button>
@@ -112,7 +124,7 @@
     <div id="playersPanel" class="drawer" role="dialog" aria-label="Busca de jogadores" hidden>
       <div class="drawer-head">
         <h2>Busca de jogadores</h2>
-        <button id="playersClose" type="button" class="icon" title="Fechar (Esc)">✕</button>
+        <button id="playersClose" type="button" class="icon" title="Fechar (Esc)" aria-label="Fechar"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d='M18 6 6 18M6 6l12 12'/></svg></button>
       </div>
       <div class="tabs" role="tablist">
         <button type="button" class="tab on" role="tab" aria-selected="true">Escape from Tarkov</button>
@@ -144,7 +156,7 @@
     <div id="tasksPanel" class="drawer" role="dialog" aria-label="Busca de tarefas" hidden>
       <div class="drawer-head">
         <h2>Busca de tarefas</h2>
-        <button id="tasksClose" type="button" class="icon" title="Fechar (Esc)">✕</button>
+        <button id="tasksClose" type="button" class="icon" title="Fechar (Esc)" aria-label="Fechar"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d='M18 6 6 18M6 6l12 12'/></svg></button>
       </div>
       <div class="tabs" role="tablist">
         <button type="button" class="tab on" role="tab" aria-selected="true">Escape from Tarkov</button>
@@ -168,7 +180,7 @@
     <div id="mapsPanel" class="drawer map-drawer" role="dialog" aria-label="Mapas" hidden>
       <div class="drawer-head">
         <h2>Mapas</h2>
-        <button id="mapsClose" type="button" class="icon" title="Fechar (Esc)">✕</button>
+        <button id="mapsClose" type="button" class="icon" title="Fechar (Esc)" aria-label="Fechar"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d='M18 6 6 18M6 6l12 12'/></svg></button>
       </div>
       <div class="tabs" role="tablist">
         <button type="button" class="tab on" role="tab" aria-selected="true">Escape from Tarkov</button>
@@ -178,9 +190,9 @@
         <img id="mapImage" alt="Mapa" draggable="false" hidden>
         <p id="mapLoading" class="map-loading">Carregando o mapa…</p>
         <div class="map-zoom">
-          <button id="mapZoomIn" type="button" title="Aproximar">+</button>
-          <button id="mapZoomOut" type="button" title="Afastar">−</button>
-          <button id="mapFit" type="button" title="Mostrar o mapa inteiro">⤢</button>
+          <button id="mapZoomIn" type="button" title="Aproximar" aria-label="Aproximar"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d='M12 5v14M5 12h14'/></svg></button>
+          <button id="mapZoomOut" type="button" title="Afastar" aria-label="Afastar"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d='M5 12h14'/></svg></button>
+          <button id="mapFit" type="button" title="Mostrar o mapa inteiro" aria-label="Mostrar o mapa inteiro"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d='M8 3H5a2 2 0 0 0-2 2v3M21 8V5a2 2 0 0 0-2-2h-3M3 16v3a2 2 0 0 0 2 2h3M16 21h3a2 2 0 0 0 2-2v-3'/></svg></button>
         </div>
       </div>
       <p id="mapCredit" class="drawer-foot"></p>
@@ -197,11 +209,47 @@
     </div>
   </main>
 
-  <div id="banner" hidden></div>
+  <div id="banner" role="status" hidden></div>
+
+  <dialog id="about" class="sheet" aria-label="Sobre">
+    <button type="button" class="icon sheet-close" title="Fechar (Esc)" aria-label="Fechar"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d='M18 6 6 18M6 6l12 12'/></svg></button>
+    <div class="about-head">
+      <img class="logo" src="logo.svg" alt="">
+      <div>
+        <h2>Tela</h2>
+        <p class="muted">Versão <span class="app-version"></span></p>
+      </div>
+    </div>
+    <p>Compartilhamento de tela entre amigos, direto do navegador. O vídeo vai de PC para PC (WebRTC), criptografado; nada passa por servidor nosso nem fica salvo.</p>
+    <h3>Atalhos</h3>
+    <ul class="shortcuts">
+      <li><span><kbd>Ctrl</kbd>+<kbd>K</kbd></span> Busca rápida de itens, tarefas, mapas e jogadores</li>
+      <li><span><kbd>Esc</kbd></span> Fecha painéis e janelas</li>
+      <li><span>Duplo clique</span> Tela cheia no vídeo · zoom no mapa</li>
+    </ul>
+    <h3>Créditos</h3>
+    <ul class="credits">
+      <li>Preços, tarefas e perfis: <a href="https://tarkov.dev" target="_blank" rel="noopener noreferrer">tarkov.dev</a> (código aberto, MIT)</li>
+      <li>Mapas: monkimonkimonk, re3mr, xTycho, Lorathor e Jindouz, via tarkov.dev</li>
+      <li>Conexão entre os PCs: <a href="https://github.com/dmotz/trystero" target="_blank" rel="noopener noreferrer">Trystero</a> (MIT)</li>
+      <li>Escape from Tarkov é marca da Battlestate Games. Este site não é oficial.</li>
+    </ul>
+  </dialog>
+
+  <dialog id="palette" class="sheet palette" aria-label="Busca rápida">
+    <div class="palette-input">
+      <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx='11' cy='11' r='7'/><path d='m20 20-3.5-3.5'/></svg>
+      <input id="paletteQuery" placeholder="Buscar item, tarefa, mapa ou jogador…" autocomplete="off" spellcheck="false">
+      <kbd>Esc</kbd>
+    </div>
+    <ul id="paletteResults" class="palette-results" role="listbox"></ul>
+    <p id="paletteHint" class="palette-hint">Digite para buscar. <kbd>↑</kbd><kbd>↓</kbd> para escolher, <kbd>Enter</kbd> para abrir.</p>
+  </dialog>
   <script type="module" src="app.js"></script>
   <script type="module" src="items.js"></script>
   <script type="module" src="players.js"></script>
   <script type="module" src="tasks.js"></script>
   <script type="module" src="maps.js"></script>
+  <script type="module" src="palette.js"></script>
 </body>
 </html>

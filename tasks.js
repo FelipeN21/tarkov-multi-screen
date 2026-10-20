@@ -3,7 +3,7 @@
 // ficam em inglês, como no jogo e na wiki; a busca também aceita o nome em português.
 // Como na busca de itens, a lista é baixada uma vez ao abrir o painel e a busca roda no navegador.
 
-import { MODES, fold, safeUrl, searchText, getJSON, getOnce, openDrawer, closeDrawer } from './tarkov-data.js';
+import { MODES, fold, safeUrl, searchText, getJSON, getOnce, openDrawer, closeDrawer, showSkeleton, clearSkeleton } from './tarkov-data.js';
 
 const MAX_RESULTS = 15;
 const MAX_OPTIONS = 3; // "any of": quantas opções mostrar pelo nome
@@ -154,14 +154,17 @@ async function ensureList() {
   const m = mode;
   if (lists[m]) return lists[m];
   status('Baixando a lista de tarefas…');
+  showSkeleton($('#taskResults'));
   lists[m] = loadList(m)
     .then((list) => {
       lists[m] = list;
+      clearSkeleton($('#taskResults'));
       if (m === mode && !$('#taskResults').children.length) status(`${list.length} tarefas · digite e aperte Enter`);
       return list;
     })
     .catch((err) => {
       delete lists[m];
+      clearSkeleton($('#taskResults'));
       console.warn('tarkov.dev:', err);
       status('Não foi possível baixar as tarefas da tarkov.dev. Tente de novo em alguns minutos.', 'error');
       throw err;
@@ -176,9 +179,29 @@ $('#taskSearch').addEventListener('submit', (e) => {
 });
 
 let searching = false;
+// Nome da tarefa (inglês ou português), trader ou mapa; primeiro pelo começo das palavras.
+function match(list, raw) {
+  const words = fold(raw).replace(/[^a-z0-9.]+/g, ' ').split(' ').filter(Boolean);
+  let found = list.filter((t) => words.every((w) => t.search.includes(' ' + w)));
+  if (!found.length) found = list.filter((t) => words.every((w) => t.search.includes(w)));
+  const q = fold(raw);
+  const rank = (t) => (fold(t.name) === q || fold(t.namePt) === q ? 0 : fold(t.name).startsWith(q) || fold(t.namePt).startsWith(q) ? 1 : 2);
+  return found.sort((a, b) => rank(a) - rank(b) || a.level - b.level || a.name.localeCompare(b.name));
+}
+
+// Para a busca rápida (Ctrl+K).
+export async function quickFind(raw, n = 4) {
+  const list = await ensureList();
+  return raw ? match(list, raw).slice(0, n) : [];
+}
+export function openTasks(raw) {
+  openPanel();
+  $('#taskQuery').value = raw;
+  search();
+}
+
 async function search() {
   const raw = $('#taskQuery').value.trim().replace(/\s+/g, ' ');
-  const words = fold(raw).replace(/[^a-z0-9.]+/g, ' ').split(' ').filter(Boolean);
   if (raw.length < 2) return status('Digite pelo menos 2 letras.', 'warn');
   if (searching) return;
   searching = true;
@@ -193,13 +216,7 @@ async function search() {
     $('#taskSearch button').disabled = false;
   }
 
-  // Nome da tarefa (inglês ou português), trader ou mapa; primeiro pelo começo das palavras.
-  let found = list.filter((t) => words.every((w) => t.search.includes(' ' + w)));
-  if (!found.length) found = list.filter((t) => words.every((w) => t.search.includes(w)));
-  const q = fold(raw);
-  const rank = (t) => (fold(t.name) === q || fold(t.namePt) === q ? 0 : fold(t.name).startsWith(q) || fold(t.namePt).startsWith(q) ? 1 : 2);
-  found.sort((a, b) => rank(a) - rank(b) || a.level - b.level || a.name.localeCompare(b.name));
-
+  const found = match(list, raw);
   $('#taskResults').replaceChildren(...found.slice(0, MAX_RESULTS).map(renderTask));
   $('#taskResults').scrollTop = 0;
   const modeName = MODES[mode];

@@ -4,7 +4,7 @@
 // (~2 MB) e a busca roda no navegador: digitar não faz nenhuma requisição, e a lista só é
 // baixada de novo depois de alguns minutos.
 
-import { MODES, fold, safeUrl, searchText, getJSON, getOnce, openDrawer, closeDrawer } from './tarkov-data.js';
+import { MODES, fold, safeUrl, searchText, getJSON, getOnce, openDrawer, closeDrawer, showSkeleton, clearSkeleton } from './tarkov-data.js';
 
 const MAX_RESULTS = 30;
 const REFRESH_MS = 10 * 60 * 1000;
@@ -95,14 +95,17 @@ async function ensureList() {
   if (cur && Date.now() - cur.time < REFRESH_MS) return cur;
   const m = mode;
   status(cur ? 'Atualizando preços…' : 'Baixando a lista de itens (~2 MB, só na primeira vez)…');
+  showSkeleton($('#itemResults'));
   lists[m] = loadList(m)
     .then((list) => {
       lists[m] = list;
+      clearSkeleton($('#itemResults'));
       if (m === mode && !$('#itemResults').children.length) status(readyText(list));
       return list;
     })
     .catch((err) => {
       lists[m] = cur; // mantém a lista antiga, se houver
+      clearSkeleton($('#itemResults'));
       console.warn('tarkov.dev:', err);
       status('Não foi possível baixar os preços da tarkov.dev. Tente de novo em alguns minutos.', 'error');
       throw err;
@@ -122,9 +125,35 @@ $('#itemSearch').addEventListener('submit', (e) => {
 });
 
 let searching = false;
+// Todas as palavras precisam aparecer (em inglês ou português, nome ou abreviação). Primeiro
+// procura no começo das palavras ("gpu" acha GPU, não "Magpul"); se não achar nada, no meio.
+function match(items, raw) {
+  const words = fold(raw).replace(/[^a-z0-9.]+/g, ' ').split(' ').filter(Boolean);
+  let found = items.filter((i) => words.every((w) => i.search.includes(' ' + w)));
+  if (!found.length) found = items.filter((i) => words.every((w) => i.search.includes(w)));
+  const q = fold(raw);
+  const rank = (i) => {
+    if (fold(i.short) === q || fold(i.name) === q) return 0;
+    if (fold(i.short).startsWith(q) || fold(i.name).startsWith(q) || fold(i.namePt).startsWith(q)) return 1;
+    return 2;
+  };
+  return found.sort((a, b) => rank(a) - rank(b) || Math.max(b.low, b.trader?.price || 0) - Math.max(a.low, a.trader?.price || 0));
+}
+
+// Para a busca rápida (Ctrl+K): procura sem mexer no painel, e abre o painel já buscando.
+export async function quickFind(raw, n = 5) {
+  const list = await ensureList();
+  return raw ? match(list.items, raw).slice(0, n) : [];
+}
+export function openItems(raw) {
+  openPanel();
+  $('#itemQuery').value = raw;
+  search();
+}
+export const formatPrice = rub;
+
 async function search() {
   const raw = $('#itemQuery').value.trim().replace(/\s+/g, ' ');
-  const words = fold(raw).replace(/[^a-z0-9.]+/g, ' ').split(' ').filter(Boolean);
   if (raw.length < 2) return status('Digite pelo menos 2 letras.', 'warn');
   if (searching) return;
   searching = true;
@@ -139,18 +168,7 @@ async function search() {
     $('#itemSearch button').disabled = false;
   }
 
-  // Todas as palavras precisam aparecer (em inglês ou português, nome ou abreviação). Primeiro
-  // procura no começo das palavras ("gpu" acha GPU, não "Magpul"); se não achar nada, no meio.
-  let found = list.items.filter((i) => words.every((w) => i.search.includes(' ' + w)));
-  if (!found.length) found = list.items.filter((i) => words.every((w) => i.search.includes(w)));
-  const q = fold(raw);
-  const rank = (i) => {
-    if (fold(i.short) === q || fold(i.name) === q) return 0;
-    if (fold(i.short).startsWith(q) || fold(i.name).startsWith(q) || fold(i.namePt).startsWith(q)) return 1;
-    return 2;
-  };
-  found.sort((a, b) => rank(a) - rank(b) || Math.max(b.low, b.trader?.price || 0) - Math.max(a.low, a.trader?.price || 0));
-
+  const found = match(list.items, raw);
   $('#itemResults').replaceChildren(...found.slice(0, MAX_RESULTS).map(renderItem));
   $('#itemResults').scrollTop = 0;
   const modeName = MODES[mode];

@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#3a8dff"/>
+      <stop offset="1" stop-color="#5e5ce6"/>
+    </linearGradient>
+  </defs>
+  <rect width="64" height="64" rx="14" fill="url(#bg)"/>
+  <!-- duas telas: a de trás em contorno, a da frente cheia (várias telas / PiP) -->
+  <rect x="11" y="14" width="32" height="23" rx="4" fill="none" stroke="#fff" stroke-width="3.5"/>
+  <rect x="27" y="28" width="26" height="19" rx="4" fill="#fff"/>
+  <path d="M37 33.5v8l6.5-4z" fill="#4a75f3"/>
+</svg>

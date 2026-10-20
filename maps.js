@@ -2,7 +2,7 @@
 // abaixo), baixadas do tarkov.dev e guardadas na pasta maps/ do site. Para atualizar um mapa,
 // troque o arquivo em maps/ (veja o README).
 
-import { openDrawer, closeDrawer } from './tarkov-data.js';
+import { fold, openDrawer, closeDrawer } from './tarkov-data.js';
 
 const MAPS = [
   { key: 'customs', name: 'Customs', author: 'monkimonkimonk', link: 'https://www.reddit.com/user/monkimonkimonk/' },
@@ -70,10 +70,25 @@ function show(map) {
   a.textContent = map.author;
   credit.replaceChildren(`Mapa ${map.name} por `, a, ' · via tarkov.dev · arraste para mover, use a roda do mouse ou os botões para o zoom');
 
+  const src = `maps/${map.key}.webp`;
+  // Mesma imagem já carregada: o navegador não avisa "carregou" de novo, então só reajusta.
+  if (img.getAttribute('src') === src && img.complete && img.naturalWidth) {
+    $('#mapLoading').hidden = true;
+    img.hidden = false;
+    fit();
+    return;
+  }
   $('#mapLoading').textContent = 'Carregando o mapa…';
   $('#mapLoading').hidden = false;
   img.hidden = true;
-  img.src = `maps/${map.key}.webp`;
+  img.src = src;
+}
+
+// Para a busca rápida (Ctrl+K).
+export const findMaps = (raw) => MAPS.filter((m) => fold(m.name).includes(fold(raw)) || m.key.includes(fold(raw)));
+export function openMap(key) {
+  openDrawer($('#mapsPanel'), $('#mapsBtn'));
+  show(MAPS.find((m) => m.key === key) || MAPS[0]);
 }
 
 img.addEventListener('load', () => {

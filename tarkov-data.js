@@ -31,6 +31,20 @@ export function getOnce(path) {
   return once.get(path);
 }
 
+// Esqueleto de carregamento: cartões cinza animados enquanto a lista baixa.
+export function showSkeleton(ul, n = 3) {
+  if (ul.children.length) return;
+  for (let i = 0; i < n; i++) {
+    const li = document.createElement('li');
+    li.className = 'skeleton';
+    li.setAttribute('aria-hidden', 'true');
+    ul.append(li);
+  }
+}
+export function clearSkeleton(ul) {
+  for (const li of ul.querySelectorAll('.skeleton')) li.remove();
+}
+
 // Só um painel lateral aberto por vez.
 export function openDrawer(panel, button) {
   for (const d of document.querySelectorAll('.drawer')) d.hidden = true;

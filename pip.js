@@ -3,9 +3,11 @@
 // MediaStreams dos quadros da página, então não há conexão nem decodificação extra.
 // O som continua saindo dos quadros da página; o 🔊 daqui só liga/desliga o de lá.
 
+import { icon } from './icons.js';
+
 export const pipSupported = 'documentPictureInPicture' in window;
 
-const LAYOUTS = { grid: '▦ Grade', focus: '◧ Destaque', strip: '▬ Faixa' };
+const LAYOUTS = { grid: 'Grade', focus: 'Destaque', strip: 'Faixa' }; // o ícone de cada um tem o mesmo nome
 const NO_CROP = { x: 0, y: 0, w: 1, h: 1 };
 
 let source = { screens: () => [], toggleSound: () => {}, setVolume: () => {} };
@@ -102,6 +104,7 @@ function build() {
   const layouts = {};
   for (const [k, text] of Object.entries(LAYOUTS)) {
     const b = h('button', '', text);
+    b.prepend(icon(k, win.document));
     b.onclick = () => {
       settings.layout = k;
       prevLayout = null;
@@ -165,7 +168,7 @@ function updateCell(s) {
   c.label.textContent = nameOf(s);
   if (c.video.srcObject !== s.stream) c.video.srcObject = s.stream;
   c.soundBtn.hidden = c.volume.hidden = s.muted == null;
-  c.soundBtn.textContent = s.muted ? '🔇' : '🔊';
+  c.soundBtn.replaceChildren(icon(s.muted ? 'mute' : 'volume', win.document));
   c.volume.value = s.volume;
   applyCrop(c);
 }
@@ -180,7 +183,7 @@ function makeCell(id) {
   view.append(video);
   const label = h('div', 'pip-label');
   const tools = h('div', 'pip-tools');
-  const soundBtn = h('button', '', '🔇');
+  const soundBtn = h('button');
   soundBtn.title = 'Ligar/desligar som';
   const volume = h('input');
   volume.type = 'range';
@@ -188,9 +191,11 @@ function makeCell(id) {
   volume.max = 1;
   volume.step = 0.05;
   volume.title = 'Volume';
-  const cropBtn = h('button', '', '✂');
+  const cropBtn = h('button');
+  cropBtn.append(icon('crop', win.document));
   cropBtn.title = 'Recortar: arraste sobre a área que quer ver (Esc cancela)';
-  const resetBtn = h('button', '', '↺');
+  const resetBtn = h('button');
+  resetBtn.append(icon('reset', win.document));
   resetBtn.title = 'Voltar a mostrar a tela inteira';
   tools.append(soundBtn, volume, cropBtn, resetBtn);
   el.append(view, label, tools);

@@ -3,8 +3,11 @@
 // se encontrarem e trocarem as mensagens de negociação. O vídeo nunca passa por eles.
 import { joinRoom, selfId } from './vendor/trystero.js';
 import { pipSupported, connectPip, openPip, closePip, isPipOpen, refreshPip } from './pip.js';
+import { icon } from './icons.js';
 
 const APP_ID = 'tela-compartilhar-tela-v1';
+// Aparece no rodapé, nos ajustes e no "Sobre": ajuda a saber se o navegador está com a versão nova.
+export const APP_VERSION = '2026.10.20';
 
 // STUN descobre o IP público. Se algum amigo não conseguir conectar (4G, rede de faculdade…),
 // adicione um servidor TURN aqui, por exemplo:
@@ -587,9 +590,9 @@ function makeTile(id, label, withSound) {
   el.className = 'tile';
   el.innerHTML =
     '<video autoplay playsinline muted></video><div class="label"></div><div class="stats"></div>' +
-    '<div class="tools"><button data-a="sound" title="Ligar/desligar som">🔇</button>' +
-    '<input data-a="vol" type="range" min="0" max="1" step="0.05" title="Volume">' +
-    '<button data-a="full" title="Tela cheia">⛶</button></div>';
+    '<div class="tools"><button data-a="sound" title="Ligar/desligar som" aria-label="Ligar/desligar som"></button>' +
+    '<input data-a="vol" type="range" min="0" max="1" step="0.05" title="Volume" aria-label="Volume">' +
+    '<button data-a="full" title="Tela cheia" aria-label="Tela cheia"></button></div>';
   t = {
     el,
     video: el.querySelector('video'),
@@ -599,6 +602,8 @@ function makeTile(id, label, withSound) {
   t.label.textContent = label;
   const soundBtn = el.querySelector('[data-a="sound"]');
   const slider = el.querySelector('[data-a="vol"]');
+  soundBtn.append(icon('mute'));
+  el.querySelector('[data-a="full"]').append(icon('expand'));
   t.withSound = withSound;
   if (withSound) {
     // Volume salvo por nome, para valer nas próximas vezes. O som começa desligado (regra dos
@@ -609,7 +614,7 @@ function makeTile(id, label, withSound) {
     t.setMuted = (muted) => {
       if (!muted && t.video.volume === 0) t.setVolume(1);
       t.video.muted = muted;
-      soundBtn.textContent = muted ? '🔇' : '🔊';
+      soundBtn.replaceChildren(icon(muted ? 'mute' : 'volume'));
       refreshPip();
     };
     t.setVolume = (v) => {
@@ -693,20 +698,57 @@ $('#pip').addEventListener('click', async () => {
   }
 });
 
+// Cor fixa por pessoa (a mesma em todos os PCs, porque vem do nome).
+const AVATAR_COLORS = ['#e5484d', '#f76b15', '#c99a06', '#30a46c', '#0d9488', '#0a84ff', '#5e5ce6', '#9d4edd', '#d6409f'];
+function avatarColor(name) {
+  let h = 0;
+  for (const ch of name) h = (h * 31 + ch.codePointAt(0)) >>> 0;
+  return AVATAR_COLORS[h % AVATAR_COLORS.length];
+}
+
 function renderPeople() {
   const ul = $('#people');
   ul.replaceChildren();
   for (const [id, p] of people) {
     const li = document.createElement('li');
-    li.textContent = p.name + (id === myId ? ' (você)' : '');
+    const avatar = document.createElement('span');
+    avatar.className = 'avatar';
+    avatar.textContent = (Array.from(p.name.trim())[0] || '?').toUpperCase();
+    avatar.style.background = avatarColor(p.name);
+    const who = document.createElement('span');
+    who.className = 'who';
+    const name = document.createElement('span');
+    name.className = 'who-name';
+    name.textContent = p.name;
+    if (id === myId) {
+      const you = document.createElement('span');
+      you.className = 'muted';
+      you.textContent = ' (você)';
+      name.append(you);
+    }
+    const state = document.createElement('span');
+    state.className = 'who-state';
+    state.textContent = p.sharing ? 'transmitindo' : 'assistindo';
+    who.append(name, state);
+    li.append(avatar, who);
     if (p.sharing) {
       const live = document.createElement('span');
       live.className = 'live';
-      live.textContent = '● AO VIVO';
+      live.textContent = 'AO VIVO';
       li.append(live);
     }
     ul.append(li);
   }
+}
+
+// Tema claro/escuro. O escuro é o padrão; o <head> do index.html já aplica o tema salvo.
+for (const b of document.querySelectorAll('.theme-toggle')) {
+  b.addEventListener('click', () => {
+    const light = document.documentElement.dataset.theme !== 'light';
+    if (light) document.documentElement.dataset.theme = 'light';
+    else delete document.documentElement.dataset.theme;
+    save('theme', light ? 'light' : 'dark');
+  });
 }
 
 // O painel de ajustes fecha ao clicar fora dele ou apertar Esc.
@@ -719,21 +761,49 @@ document.addEventListener('keydown', (e) => e.key === 'Escape' && ($('.settings'
 $('#copy').addEventListener('click', async () => {
   try {
     await navigator.clipboard.writeText(location.href);
-    $('#copy').textContent = $('#password').value ? 'Link copiado! Mande a senha à parte' : 'Link copiado!';
+    showBanner($('#password').value ? 'Link copiado. Mande a senha à parte.' : 'Link copiado.', null, null, 'ok');
   } catch {
     prompt('Copie o link:', location.href);
   }
-  setTimeout(() => ($('#copy').textContent = 'Copiar link'), 2000);
 });
 
-function showBanner(text, buttonText, onClick) {
+// Versão e janela "Sobre"
+for (const el of document.querySelectorAll('.app-version')) el.textContent = APP_VERSION;
+for (const b of document.querySelectorAll('.about-open')) {
+  b.addEventListener('click', () => {
+    $('.settings').open = false;
+    $('#about').showModal();
+  });
+}
+// Janelas (Sobre, busca rápida): botão de fechar e clique fora fecham.
+for (const d of document.querySelectorAll('dialog.sheet')) {
+  d.querySelector('.sheet-close')?.addEventListener('click', () => d.close());
+  d.addEventListener('click', (e) => e.target === d && d.close());
+}
+
+// Aviso no canto (estilo notificação). Sem ação para tomar (ou só "OK"), some sozinho.
+let bannerTimer;
+function showBanner(text, buttonText, onClick, kind = 'warn') {
   const b = $('#banner');
-  b.replaceChildren(text);
-  if (buttonText) {
+  clearTimeout(bannerTimer);
+  b.className = 'toast ' + kind;
+  const body = document.createElement('span');
+  body.className = 'toast-text';
+  body.textContent = text;
+  const close = document.createElement('button');
+  close.className = 'icon';
+  close.title = 'Fechar';
+  close.setAttribute('aria-label', 'Fechar');
+  close.append(icon('close'));
+  close.onclick = () => (b.hidden = true);
+  b.replaceChildren(icon(kind === 'ok' ? 'check' : kind === 'info' ? 'info' : 'warning'), body);
+  if (buttonText && buttonText !== 'OK') {
     const btn = document.createElement('button');
     btn.textContent = buttonText;
     btn.onclick = onClick;
     b.append(btn);
   }
+  b.append(close);
   b.hidden = false;
+  if (!buttonText || buttonText === 'OK') bannerTimer = setTimeout(() => (b.hidden = true), kind === 'ok' ? 3000 : 9000);
 }

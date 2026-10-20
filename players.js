@@ -6,6 +6,7 @@
 //  - com um ID ou o link do perfil, abre o perfil direto, e guarda nome + ID nos recentes.
 
 import { MODES, openDrawer, closeDrawer } from './tarkov-data.js';
+import { icon } from './icons.js';
 
 const MAX_RECENT = 8;
 
@@ -145,6 +146,14 @@ $('#playerSearch').addEventListener('submit', (e) => {
   }
 });
 
+// Para a busca rápida (Ctrl+K): uma palavra só que parece nome, ID ou link de perfil.
+export const looksLikePlayer = (raw) => !/\s/.test(raw.trim()) && !parse(raw).error;
+export function openPlayer(raw) {
+  openPanel();
+  $('#playerName').value = raw;
+  $('#playerSearch').requestSubmit();
+}
+
 // ---------- buscados recentemente ----------
 function renderRecent() {
   $('#playerRecentBox').hidden = !recent.length;
@@ -173,7 +182,8 @@ function renderRecent() {
       const remove = document.createElement('button');
       remove.type = 'button';
       remove.className = 'recent-remove';
-      remove.textContent = '✕';
+      remove.append(icon('close'));
+      remove.setAttribute('aria-label', 'Tirar da lista');
       remove.title = 'Tirar da lista';
       remove.addEventListener('click', () => {
         recent = recent.filter((e) => e !== entry);
