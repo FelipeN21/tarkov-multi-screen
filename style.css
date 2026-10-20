@@ -360,6 +360,45 @@ aside h2 { margin: 2px 0 8px; padding: 0 8px; font-size: 12px; font-weight: 600;
   letter-spacing: .02em;
 }
 
+/* Spotify Jams (seção expansível na lateral) */
+.jams { margin-top: 12px; padding-top: 10px; border-top: 1px solid var(--line); }
+.jams summary {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 2px 8px 8px;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 600;
+  list-style: none;
+  cursor: pointer;
+  user-select: none;
+}
+.jams summary::-webkit-details-marker { display: none; }
+.jams summary::after { content: "›"; margin-left: auto; font-size: 15px; transition: transform .2s; }
+.jams[open] summary::after { transform: rotate(90deg); }
+.jam-count:not(:empty) { padding: 0 6px; border-radius: 999px; background: rgba(30, 215, 96, .18); color: #1ed760; font-size: 11px; }
+:root[data-theme="light"] .jam-count:not(:empty) { color: #148a3e; }
+.jam-list { list-style: none; margin: 0 0 10px; padding: 0; display: flex; flex-direction: column; gap: 4px; }
+.jam { display: flex; align-items: center; gap: 8px; padding: 6px 6px 6px 8px; border-radius: 10px; background: var(--fill); }
+.jam-icon { display: grid; place-items: center; flex-shrink: 0; width: 26px; height: 26px; border-radius: 50%; background: #1ed760; color: #000; }
+.jam-icon .ic { width: 14px; height: 14px; }
+.jam-text { display: flex; flex-direction: column; min-width: 0; flex: 1; line-height: 1.25; }
+.jam-title { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 13px; font-weight: 600; }
+.jam-host { color: var(--muted); font-size: 11px; }
+.jam-actions { display: flex; gap: 2px; flex-shrink: 0; }
+.jam-btn { display: grid; place-items: center; width: 26px; height: 26px; padding: 0; border: 0; border-radius: 50%; background: none; color: var(--muted); }
+.jam-btn:hover { background: var(--fill-hover); color: var(--text); }
+.jam-btn .ic { width: 14px; height: 14px; }
+.jam-empty { padding: 4px 8px; color: var(--muted-2); font-size: 12.5px; }
+.jam-form { display: flex; gap: 6px; }
+.jam-form input:not([type]) { height: 34px; padding: 0 10px; font-size: 13px; }
+.jam-form button { flex-shrink: 0; height: 34px; padding-inline: 12px; font-size: 13px; }
+.jam-status { margin: 8px 2px 0; color: var(--muted); font-size: 11.5px; line-height: 1.45; overflow-wrap: anywhere; }
+.jam-status.ok { color: var(--ok); }
+.jam-status.warn { color: var(--warn); }
+.jam-status.error { color: var(--danger); }
+
 #grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(min(100%, 480px), 1fr));

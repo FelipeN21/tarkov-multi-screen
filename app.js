@@ -4,6 +4,7 @@
 import { joinRoom, selfId } from './vendor/trystero.js';
 import { pipSupported, connectPip, openPip, closePip, isPipOpen, refreshPip } from './pip.js';
 import { icon } from './icons.js';
+import { connectJams, renderJams, canonicalJam } from './jams.js';
 
 const APP_ID = 'tela-compartilhar-tela-v1';
 // Aparece no rodapé, nos ajustes e no "Sobre": ajuda a saber se o navegador está com a versão nova.
@@ -132,7 +133,16 @@ $('#join').addEventListener('submit', async (e) => {
   room.onPeerLeave = (peerId) => enqueue(() => onPeerLeave(peerId));
   addEventListener('pagehide', () => room.leave());
 
-  people.set(myId, { name: myName, sharing: false });
+  people.set(myId, { name: myName, sharing: false, jam: null });
+  connectJams({
+    people: () => people,
+    myId,
+    publish: (url) => {
+      people.get(myId).jam = url;
+      sendState();
+      renderJams();
+    },
+  });
   renderPeople();
 
   $('#roomName').textContent = roomName + (secret ? ' 🔒' : '');
@@ -159,12 +169,13 @@ const signal = (to, data) => sigAction.send(JSON.parse(JSON.stringify(data)), { 
 
 // Nome e "está compartilhando?" de cada um. Enviado ao conhecer alguém e quando muda.
 function sendState(target = null) {
-  stateAction.send({ name: myName, sharing: !!localStream }, { target }).catch(() => {});
+  stateAction.send({ name: myName, sharing: !!localStream, jam: people.get(myId)?.jam || null }, { target }).catch(() => {});
 }
 
 async function onState(peerId, data) {
   const isNew = !people.has(peerId);
-  people.set(peerId, { name: String(data.name || 'Anônimo').slice(0, 32), sharing: !!data.sharing });
+  // A Jam vem de outro PC: só entra se for mesmo um link do Spotify (validada de novo aqui).
+  people.set(peerId, { name: String(data.name || 'Anônimo').slice(0, 32), sharing: !!data.sharing, jam: canonicalJam(data.jam) });
   const tile = tiles.get(peerId);
   if (tile) {
     tile.label.textContent = people.get(peerId).name;
@@ -739,6 +750,7 @@ function renderPeople() {
     }
     ul.append(li);
   }
+  renderJams();
 }
 
 // Tema claro/escuro. O escuro é o padrão; o <head> do index.html já aplica o tema salvo.

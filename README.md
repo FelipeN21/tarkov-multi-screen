@@ -47,6 +47,12 @@ O botão **Abrir PiP** abre uma janela pequena que fica por cima de todos os pro
 3. Em **Source**, escolha *Deploy from a branch*, depois a branch `main` e a pasta `/ (root)`, e clique em **Save**.
 4. Em cerca de 1 minuto o site fica no ar em `https://SEU-USUARIO.github.io/NOME-DO-REPO/`.
 
+## Spotify Jams
+
+Na lateral, embaixo de **Na sala**, a seção **Spotify Jams** (abre e fecha) mostra as Jams do Spotify de quem está na sala. Para cadastrar a sua: no Spotify, inicie uma Jam, toque em **Compartilhar**, copie o link e cole no campo. Pode colar a mensagem inteira que o Spotify gera; o site acha o link. Cada Jam tem os botões **Entrar** (abre o link, que leva ao app do Spotify) e **Copiar**, e a sua tem **Remover**. A Jam de alguém some da lista quando a pessoa sai da sala.
+
+Por segurança, só são aceitos links `https` de `spotify.link` (o link curto do Compartilhar) ou `open.spotify.com/socialsession/…`, com o domínio exatamente igual. O link é validado de novo quando chega de outro PC e remontado só com o código, então endereços parecidos (ex.: `spotify.link.golpe.com`), `http`, links com usuário/porta ou qualquer outra coisa são recusados.
+
 ## Busca rápida (Ctrl+K)
 
 Dentro da sala, **Ctrl+K** (ou a lupa no grupo *Tarkov* da barra) abre uma busca única: digite parte do nome e aparecem mapas, itens (com o preço), tarefas (com o trader) e o atalho para o perfil de um jogador. Use **↑ ↓** e **Enter**, ou clique: o painel certo abre já com a busca feita. A filtragem roda no navegador, em cima das mesmas listas dos painéis; digitar não faz requisições.
@@ -161,5 +167,6 @@ Algumas opções são o Metered.ca (tem plano grátis), o Cloudflare Calls TURN 
 - `tarkov-data.js`: partes comuns dos painéis do Escape from Tarkov.
 - `maps.js` e `maps/`: mapas com as extrações.
 - `palette.js`: busca rápida (Ctrl+K).
+- `jams.js`: Spotify Jams da sala (com o validador de links).
 - `icons.js` e `logo.svg`: ícones e logo.
 - `vendor/trystero.js`: Trystero 0.26.0 (estratégia Nostr) empacotado num arquivo só, licença MIT.

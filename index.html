@@ -202,6 +202,15 @@
       <aside>
         <h2>Na sala</h2>
         <ul id="people"></ul>
+        <details id="jams" class="jams" open>
+          <summary><span>Spotify Jams</span><span id="jamCount" class="jam-count"></span></summary>
+          <ul id="jamList" class="jam-list"></ul>
+          <form id="jamForm" class="jam-form">
+            <input id="jamInput" maxlength="300" placeholder="Link da sua Jam" autocomplete="off" spellcheck="false" aria-label="Link da sua Jam do Spotify">
+            <button type="submit" class="primary">Salvar</button>
+          </form>
+          <p id="jamStatus" class="jam-status">No Spotify, inicie uma Jam e use <strong>Compartilhar</strong> para copiar o link.</p>
+        </details>
       </aside>
       <section id="grid">
         <p id="empty">Ninguém está compartilhando ainda.<span>Quando alguém compartilhar, a tela aparece aqui.</span></p>
