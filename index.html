@@ -37,6 +37,7 @@
       <input id="password" type="password" maxlength="64" autocomplete="off" placeholder="Combine com os amigos">
     </label>
     <button class="primary" type="submit">Entrar</button>
+    <button type="button" class="diag-open diag-join"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d='M5 12.55a11 11 0 0 1 14.08 0M1.42 9a16 16 0 0 1 21.16 0M8.53 16.11a6 6 0 0 1 6.94 0M12 20h.01'/></svg> Testar minha conexão</button>
     <p class="hint">Todos na mesma sala veem as telas compartilhadas.</p>
   </form>
   <footer id="joinFooter" class="join-footer">
@@ -66,6 +67,7 @@
           <button id="wishBtn" type="button" class="ghost drawer-btn" title="Wishlist do squad: itens que cada um precisa"><span class="lbl">Wishlist</span><span id="wishCount" class="tool-count"></span></button>
         </span>
       </nav>
+      <button type="button" class="ghost diag-open diag-bar" title="Testar minha conexão: mostra por que alguém pode não estar conectando" aria-label="Testar minha conexão"><span class="lbl">Testar conexão</span></button>
       <button id="pip" type="button" class="ghost" title="Abre uma janela por cima dos outros programas com as telas dos amigos. Abra antes de entrar no jogo (o jogo precisa estar em modo sem bordas/Borderless).">Abrir PiP</button>
       <button type="button" class="ghost icon-btn theme-toggle" title="Alternar tema claro/escuro" aria-label="Alternar tema claro/escuro"></button>
 
@@ -317,6 +319,17 @@
     </ul>
   </dialog>
 
+  <dialog id="diag" class="sheet" aria-label="Teste de conexão">
+    <button type="button" class="icon sheet-close" title="Fechar (Esc)" aria-label="Fechar"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d='M18 6 6 18M6 6l12 12'/></svg></button>
+    <h2 class="diag-title">Teste de conexão</h2>
+    <ul id="diagResults" class="diag-list"></ul>
+    <p id="diagSummary" class="diag-summary"></p>
+    <div class="diag-actions">
+      <button type="button" class="primary" id="diagCopy" hidden>Copiar relatório</button>
+      <button type="button" class="diag-open">Testar de novo</button>
+    </div>
+  </dialog>
+
   <dialog id="palette" class="sheet palette" aria-label="Busca rápida">
     <div class="palette-input">
       <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx='11' cy='11' r='7'/><path d='m20 20-3.5-3.5'/></svg>
@@ -333,5 +346,6 @@
   <script type="module" src="maps.js"></script>
   <script type="module" src="palette.js"></script>
   <script type="module" src="ammo.js"></script>
+  <script type="module" src="diagnostics.js"></script>
 </body>
 </html>

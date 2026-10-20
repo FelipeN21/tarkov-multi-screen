@@ -895,6 +895,24 @@ dialog.sheet::backdrop { background: rgba(0, 0, 0, .45); -webkit-backdrop-filter
 .shortcuts li { display: grid; grid-template-columns: 112px 1fr; align-items: center; }
 .shortcuts li > span { color: var(--text); }
 
+/* Teste de conexão */
+.diag-title { margin: 0 0 14px; font-size: 20px; letter-spacing: -.02em; }
+.diag-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px; }
+.diag-row { display: flex; gap: 10px; align-items: flex-start; padding: 10px 12px; border-radius: 12px; background: var(--bg-2); font-size: 13.5px; }
+.diag-row strong { display: block; font-weight: 600; }
+.diag-detail { display: block; color: var(--muted); font-size: 12.5px; line-height: 1.45; overflow-wrap: anywhere; }
+.diag-dot { flex-shrink: 0; width: 10px; height: 10px; margin-top: 5px; border-radius: 50%; background: var(--muted-2); }
+.diag-row.ok .diag-dot { background: var(--ok); }
+.diag-row.warn .diag-dot { background: var(--warn); }
+.diag-row.bad .diag-dot { background: var(--danger); }
+.diag-row.wait .diag-dot { background: var(--accent); animation: pulse 1s infinite; }
+.diag-summary { margin: 14px 0 0; font-size: 14px; font-weight: 600; line-height: 1.5; }
+.diag-summary:empty { display: none; }
+.diag-actions { display: flex; gap: 8px; margin-top: 16px; }
+.diag-join { display: inline-flex; align-items: center; justify-content: center; gap: 8px; width: 100%; }
+.diag-bar { --icon: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><path d='M5 12.55a11 11 0 0 1 14.08 0M1.42 9a16 16 0 0 1 21.16 0M8.53 16.11a6 6 0 0 1 6.94 0M12 20h.01'/></svg>"); }
+@media (max-width: 1560px) { .diag-bar .lbl { display: none; } }
+
 dialog.palette { width: min(620px, calc(100% - 32px)); margin-top: 12vh; padding: 0; overflow: hidden; }
 .palette-input { display: flex; align-items: center; gap: 10px; padding: 14px 16px; border-bottom: 1px solid var(--line); }
 .palette-input > .ic { width: 20px; height: 20px; color: var(--muted); }
