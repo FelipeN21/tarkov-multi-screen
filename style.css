@@ -280,8 +280,24 @@ body:has(#app:not([hidden])) .join-footer { display: none; }
 .bar .toolgroup.collapsed button.toolgroup-label { color: var(--muted-2); text-shadow: none; opacity: .6; }
 .bar .toolgroup.collapsed button.toolgroup-label:hover { opacity: .9; }
 .toolgroup.collapsed { background: none; } /* recolhido: sem a cápsula em volta, só o nome apagado */
-.toolgroup-items { display: inline-flex; align-items: center; gap: 2px; }
-.toolgroup.collapsed .toolgroup-items { display: none; }
+/* Abre e fecha deslizando: a largura vai de 0 até a medida real (--tools-w, calculada no app.js). */
+.toolgroup { transition: background .3s; }
+.toolgroup-items {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  max-width: var(--tools-w, 1000px);
+  overflow: hidden;
+  white-space: nowrap;
+  transition: max-width .38s cubic-bezier(.2, .8, .2, 1), opacity .3s, visibility 0s;
+}
+.toolgroup.collapsed .toolgroup-items {
+  max-width: 0;
+  opacity: 0;
+  visibility: hidden; /* some de verdade no fim: os botões escondidos não recebem o Tab */
+  transition: max-width .32s cubic-bezier(.4, 0, .2, 1), opacity .2s, visibility 0s .32s;
+}
+.toolgroup.no-anim, .toolgroup.no-anim * { transition: none !important; }
 .toolgroup button { padding: 5px 11px; border-radius: 9px; }
 .toolgroup .icon-btn { width: 30px; height: 30px; }
 .toolgroup .drawer-btn.on { background: var(--seg-on); box-shadow: 0 2px 6px rgba(0, 0, 0, .18); }

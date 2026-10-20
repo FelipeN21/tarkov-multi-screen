@@ -165,6 +165,7 @@ $('#join').addEventListener('submit', async (e) => {
   $('#noPassword').hidden = !!secret;
   $('#join').hidden = true;
   $('#app').hidden = false;
+  measureTools();
 
   // Ao trocar de aba, o Chrome pode abrir o PiP sozinho (como no Google Meet).
   try {
@@ -815,11 +816,25 @@ for (const b of document.querySelectorAll('.theme-toggle')) {
 // Grupo "Tarkov": clicar no nome recolhe ou mostra as ferramentas (a escolha fica salva).
 // A busca rápida (Ctrl+K) continua funcionando com o grupo recolhido.
 function setTools(open) {
+  measureTools();
   $('.toolgroup').classList.toggle('collapsed', !open);
   $('#toolsToggle').setAttribute('aria-expanded', open);
   save('tools', open ? '1' : '0');
 }
+// Largura real das ferramentas, para a animação de deslizar ir exatamente até ela.
+function measureTools() {
+  const items = $('#toolsItems');
+  // Com a sala ainda escondida (tela de entrada) a medida dá 0: ignora e mede quando aparecer.
+  if (items.scrollWidth) items.style.setProperty('--tools-w', items.scrollWidth + 'px');
+}
+addEventListener('resize', measureTools); // em telas estreitas os nomes somem e a largura muda
+addEventListener('load', measureTools); // fontes carregadas mudam a largura
+// O contador da wishlist aparece/muda depois: remede para não cortar.
+new MutationObserver(measureTools).observe($('#toolsItems'), { subtree: true, childList: true, characterData: true });
+// Estado salvo aplicado sem animar (só anima quando a pessoa clica).
+$('.toolgroup').classList.add('no-anim');
 setTools(load('tools') !== '0');
+requestAnimationFrame(() => requestAnimationFrame(() => $('.toolgroup').classList.remove('no-anim')));
 $('#toolsToggle').addEventListener('click', () => setTools($('#toolsToggle').getAttribute('aria-expanded') !== 'true'));
 
 // O painel de ajustes fecha ao clicar fora dele ou apertar Esc.
