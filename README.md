@@ -63,6 +63,8 @@ O botão **👤 Players** abre um painel para ver o perfil de um jogador: digite
 
 Não existe API pública de perfis: a do tarkov.dev exige um captcha que só funciona no site deles. Por isso o perfil abre lá, e não dentro deste site.
 
+Se o tarkov.dev mostrar **“Turnstile token expired”**, aperte **F5** na página do perfil. É uma falha deles ao abrir pelo nome: o captcha só vale uma vez e é gasto para descobrir o ID da conta. Depois do F5, o número no fim do endereço é o **ID da conta**; o painel também aceita esse ID, e por ele o perfil abre de primeira.
+
 ## Tarefas (Escape from Tarkov)
 
 O botão **📋 Tasks** busca uma tarefa pelo nome (inglês ou português), pelo trader (`prapor`) ou pelo mapa. Cada cartão mostra só o essencial:

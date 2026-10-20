@@ -118,7 +118,7 @@
         <button type="button" class="tab on" role="tab" aria-selected="true">Escape from Tarkov</button>
       </div>
       <form id="playerSearch" class="search">
-        <input id="playerName" maxlength="24" placeholder="Nome exato do jogador" autocomplete="off" spellcheck="false">
+        <input id="playerName" maxlength="24" placeholder="Nome exato ou ID da conta" autocomplete="off" spellcheck="false">
         <button class="primary" type="submit">Abrir perfil</button>
       </form>
       <div class="search-opts">
@@ -133,7 +133,11 @@
         <h3>Buscados recentemente</h3>
         <ul id="playerRecent"></ul>
       </div>
-      <p class="player-note">O perfil abre no tarkov.dev, numa aba nova: nível, facção, estatísticas de PMC, conquistas e equipamento. O nome precisa ser exato (maiúsculas não importam). O tarkov.dev pode fazer uma verificação rápida antes de mostrar o perfil.</p>
+      <div class="player-note">
+        <p>O perfil abre no tarkov.dev, numa aba nova: nível, facção, estatísticas de PMC, conquistas e equipamento. O nome precisa ser exato (maiúsculas não importam).</p>
+        <p><strong>Apareceu “Turnstile token expired”?</strong> É uma falha do tarkov.dev ao abrir pelo nome: aperte <strong>F5</strong> na página do perfil. Depois disso, o número no fim do endereço é o <strong>ID da conta</strong>; buscando pelo ID, o perfil abre de primeira.</p>
+        <p>Ou use a <a id="playerSearchLink" href="https://tarkov.dev/players" target="_blank" rel="noopener noreferrer">busca do próprio tarkov.dev</a>.</p>
+      </div>
       <p class="drawer-foot">Perfis do <a href="https://tarkov.dev/players" target="_blank" rel="noopener noreferrer">tarkov.dev</a></p>
     </div>
 

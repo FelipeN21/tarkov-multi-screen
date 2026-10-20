@@ -1,6 +1,8 @@
 // Busca de perfis de jogadores do Escape from Tarkov. Não há API pública: a do tarkov.dev exige
 // um captcha (Cloudflare Turnstile) que só funciona no domínio deles. Por isso o painel abre o
 // perfil no próprio tarkov.dev, numa aba nova; o endereço com o nome leva direto ao perfil.
+// Pelo nome, o tarkov.dev gasta o token do captcha descobrindo o ID da conta e mostra "Turnstile
+// token expired"; um F5 resolve. Pelo ID da conta (o número no fim do endereço) abre de primeira.
 
 import { MODES, openDrawer, closeDrawer } from './tarkov-data.js';
 
@@ -31,6 +33,7 @@ document.addEventListener('keydown', (e) => e.key === 'Escape' && !$('#playersPa
 // ---------- Season / PvP / PvE ----------
 function renderMode() {
   for (const b of document.querySelectorAll('#playerMode button')) b.classList.toggle('on', b.dataset.mode === mode);
+  $('#playerSearchLink').href = `https://tarkov.dev/players?gameMode=${mode}`;
 }
 for (const b of document.querySelectorAll('#playerMode button')) {
   b.addEventListener('click', () => {
@@ -47,8 +50,14 @@ function status(text, kind = '') {
   s.className = 'item-status ' + kind;
 }
 
-// Mesmas regras de nome do tarkov.dev.
+// Declarada como função (e não const) porque a lista de recentes é validada logo no começo.
+function isAccountId(s) {
+  return /^\d{1,12}$/.test(s);
+}
+
+// Mesmas regras de nome do tarkov.dev; também aceita o ID da conta.
 function validate(name) {
+  if (isAccountId(name)) return '';
   if (!/^[a-zA-Z0-9_-]*$/.test(name)) return 'O nome só pode ter letras, números, - e _.';
   if (!/^[a-zA-Z0-9_-]{3,15}$|^TarkovCitizen\d{1,10}$/i.test(name)) return 'O nome tem de 3 a 15 caracteres.';
   return '';
@@ -58,7 +67,9 @@ function validate(name) {
 function openProfile(name) {
   const url = `https://tarkov.dev/players/${mode}/${encodeURIComponent(name)}`;
   window.open(url, '_blank', 'noopener');
-  status(`Abrindo o perfil de ${name} (${MODES[mode]}) no tarkov.dev…`);
+  status(isAccountId(name)
+    ? `Abrindo o perfil da conta ${name} (${MODES[mode]}) no tarkov.dev…`
+    : `Abrindo o perfil de ${name} (${MODES[mode]})… Se aparecer “Turnstile token expired”, aperte F5 na página do perfil.`);
   recent = [name, ...recent.filter((n) => n.toLowerCase() !== name.toLowerCase())].slice(0, MAX_RECENT);
   saveRecent();
 }
