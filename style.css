@@ -539,6 +539,29 @@ a.item-name:hover { color: var(--accent); text-decoration: underline; }
 }
 .task-wiki:hover { border-color: var(--accent); background: var(--surface-2); }
 
+/* Mapas: painel largo, quase a tela toda */
+.drawer.map-drawer { left: 16px; width: auto; }
+.map-list { display: flex; flex-wrap: wrap; gap: 6px; }
+.map-list button { padding: 5px 12px; border-radius: 999px; background: var(--bg-2); font-size: 12.5px; }
+.map-list button.on { background: var(--accent); border-color: var(--accent); color: #fff; }
+.map-viewer {
+  position: relative;
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+  background: #0b0d11;
+  border: 1px solid var(--line-2);
+  border-radius: 12px;
+  cursor: grab;
+  touch-action: none;
+  user-select: none;
+}
+.map-viewer.dragging { cursor: grabbing; }
+.map-viewer img { position: absolute; left: 0; top: 0; max-width: none; transform-origin: 0 0; will-change: transform; }
+.map-loading { position: absolute; inset: 0; display: grid; place-items: center; margin: 0; color: var(--muted); }
+.map-zoom { position: absolute; right: 12px; bottom: 12px; display: flex; flex-direction: column; gap: 6px; }
+.map-zoom button { width: 38px; height: 38px; padding: 0; font-size: 18px; background: var(--glass); backdrop-filter: blur(8px); }
+
 /* Busca de jogadores */
 #playersPanel .drawer-foot { margin-top: auto; }
 .recent h3 { margin: 4px 0 8px; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); }
@@ -553,7 +576,7 @@ a.item-name:hover { color: var(--accent); text-decoration: underline; }
 .drawer-foot a { color: var(--muted); }
 
 @media (max-width: 760px) {
-  .drawer { top: auto; left: 0; right: 0; bottom: 0; width: auto; height: 85vh; border-radius: 18px 18px 0 0; }
+  .drawer, .drawer.map-drawer { top: auto; left: 0; right: 0; bottom: 0; width: auto; height: 85vh; border-radius: 18px 18px 0 0; }
 }
 
 /* ---------- Janela PiP ---------- */

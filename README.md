@@ -76,6 +76,14 @@ Os cartões ficam em inglês, como no jogo e na wiki. A busca aceita o nome em i
 
 Também tem **Season / PvP / PvE** (o Season é o padrão). Os dados vêm dos mesmos arquivos públicos da tarkov.dev usados na busca de itens.
 
+## Mapas (Escape from Tarkov)
+
+O botão **🗺️ Mapas** abre os mapas com os nomes das extrações (PMC, Scav e compartilhadas), spawns, chaves e loot desenhados. Arraste para mover; use a roda do mouse, duplo clique ou os botões **+ / −** para o zoom e **⤢** para ver o mapa inteiro. No celular, use a pinça. O site lembra o último mapa aberto.
+
+As imagens são mapas 2D da comunidade, com crédito no rodapé de cada um: monkimonkimonk (Customs, The Lab), re3mr (Factory, The Labyrinth, Terminal, Icebreaker, Transições), xTycho (Ground Zero), Lorathor (Interchange) e Jindouz (Lighthouse, Reserve, Shoreline, Streets, Woods). Foram baixadas do tarkov.dev e ficam na pasta `maps/` do site, então não dependem de nenhum serviço externo.
+
+Alguns mapas são mais antigos que outros (a data aparece na própria imagem; o de Customs, por exemplo, é de 2022). **Para atualizar um mapa:** baixe a imagem nova (o tarkov.dev serve em `https://tarkov.dev/maps/<nome>-2d.jpg`, ex.: `customs-2d.jpg`), converta para WebP (qualquer conversor online serve; ex.: squoosh.app) e salve por cima do arquivo em `maps/`, com o mesmo nome (ex.: `maps/customs.webp`). Se mudar o autor, ajuste o crédito na lista no começo do `maps.js`.
+
 ## Áudio
 
 - **Áudio**: o que vai junto depende do que você escolhe na hora de compartilhar.
@@ -142,4 +150,5 @@ Algumas opções são o Metered.ca (tem plano grátis), o Cloudflare Calls TURN 
 - `players.js`: atalho para o perfil de jogadores no tarkov.dev.
 - `tasks.js`: busca de tarefas (o que fazer e itens necessários).
 - `tarkov-data.js`: partes comuns dos painéis do Escape from Tarkov.
+- `maps.js` e `maps/`: mapas com as extrações.
 - `vendor/trystero.js`: Trystero 0.26.0 (estratégia Nostr) empacotado num arquivo só, licença MIT.

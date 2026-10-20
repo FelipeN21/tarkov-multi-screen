@@ -80,6 +80,7 @@
       <button id="itemsBtn" type="button" class="ghost drawer-btn" title="Buscar preços de itens">🔎 Itens</button>
       <button id="playersBtn" type="button" class="ghost drawer-btn" title="Abrir o perfil de um jogador">👤 Players</button>
       <button id="tasksBtn" type="button" class="ghost drawer-btn" title="O que fazer em cada tarefa e os itens necessários">📋 Tasks</button>
+      <button id="mapsBtn" type="button" class="ghost drawer-btn" title="Mapas com as extrações">🗺️ Mapas</button>
       <button id="pip" type="button" class="ghost" title="Abre uma janela por cima dos outros programas com as telas dos amigos. Abra antes de entrar no jogo (o jogo precisa estar em modo sem bordas/Borderless).">Abrir PiP</button>
       <button id="share" class="primary" type="button">Compartilhar tela</button>
     </header>
@@ -160,6 +161,27 @@
       <p class="drawer-foot">Tarefas da <a href="https://tarkov.dev/tasks" target="_blank" rel="noopener noreferrer">tarkov.dev</a> · detalhes completos na wiki</p>
     </div>
 
+    <div id="mapsPanel" class="drawer map-drawer" role="dialog" aria-label="Mapas" hidden>
+      <div class="drawer-head">
+        <h2>Mapas</h2>
+        <button id="mapsClose" type="button" class="icon" title="Fechar (Esc)">✕</button>
+      </div>
+      <div class="tabs" role="tablist">
+        <button type="button" class="tab on" role="tab" aria-selected="true">Escape from Tarkov</button>
+      </div>
+      <div id="mapList" class="map-list"></div>
+      <div id="mapViewer" class="map-viewer">
+        <img id="mapImage" alt="Mapa" draggable="false" hidden>
+        <p id="mapLoading" class="map-loading">Carregando o mapa…</p>
+        <div class="map-zoom">
+          <button id="mapZoomIn" type="button" title="Aproximar">+</button>
+          <button id="mapZoomOut" type="button" title="Afastar">−</button>
+          <button id="mapFit" type="button" title="Mostrar o mapa inteiro">⤢</button>
+        </div>
+      </div>
+      <p id="mapCredit" class="drawer-foot"></p>
+    </div>
+
     <div class="layout">
       <aside>
         <h2>Na sala</h2>
@@ -176,5 +198,6 @@
   <script type="module" src="items.js"></script>
   <script type="module" src="players.js"></script>
   <script type="module" src="tasks.js"></script>
+  <script type="module" src="maps.js"></script>
 </body>
 </html>
