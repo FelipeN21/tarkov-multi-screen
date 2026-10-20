@@ -629,6 +629,13 @@ function makeTile(id, label, withSound) {
   const toggleFull = () => (document.fullscreenElement ? document.exitFullscreen() : el.requestFullscreen());
   el.querySelector('[data-a="full"]').addEventListener('click', toggleFull);
   t.video.addEventListener('dblclick', toggleFull);
+  // O quadro acompanha a proporção da tela de quem transmite (ex.: ultrawide 21:9).
+  const fitAspect = () => {
+    const { videoWidth: w, videoHeight: h } = t.video;
+    if (w && h) el.style.setProperty('--ar', (w / h).toFixed(4));
+  };
+  t.video.addEventListener('loadedmetadata', fitAspect);
+  t.video.addEventListener('resize', fitAspect);
 
   // A prévia local fica por último; telas dos amigos primeiro.
   if (id === 'me') $('#grid').append(el);
