@@ -118,8 +118,8 @@
         <button type="button" class="tab on" role="tab" aria-selected="true">Escape from Tarkov</button>
       </div>
       <form id="playerSearch" class="search">
-        <input id="playerName" maxlength="24" placeholder="Nome exato ou ID da conta" autocomplete="off" spellcheck="false">
-        <button class="primary" type="submit">Abrir perfil</button>
+        <input id="playerName" maxlength="120" placeholder="Nome, ID ou link do perfil" autocomplete="off" spellcheck="false">
+        <button class="primary" type="submit">Abrir</button>
       </form>
       <div class="search-opts">
         <div id="playerMode" class="seg" title="Cada modo tem um perfil próprio">
@@ -134,9 +134,9 @@
         <ul id="playerRecent"></ul>
       </div>
       <div class="player-note">
-        <p>O perfil abre no tarkov.dev, numa aba nova: nível, facção, estatísticas de PMC, conquistas e equipamento. O nome precisa ser exato (maiúsculas não importam).</p>
-        <p><strong>Apareceu “Turnstile token expired”?</strong> É uma falha do tarkov.dev ao abrir pelo nome: aperte <strong>F5</strong> na página do perfil. Depois disso, o número no fim do endereço é o <strong>ID da conta</strong>; buscando pelo ID, o perfil abre de primeira.</p>
-        <p>Ou use a <a id="playerSearchLink" href="https://tarkov.dev/players" target="_blank" rel="noopener noreferrer">busca do próprio tarkov.dev</a>.</p>
+        <p>O perfil abre no tarkov.dev, numa aba nova: nível, facção, estatísticas de PMC, conquistas e equipamento.</p>
+        <p><strong>Pelo nome:</strong> o site copia o nome e abre a <a id="playerSearchLink" href="https://tarkov.dev/players" target="_blank" rel="noopener noreferrer">busca do tarkov.dev</a>. Lá, aperte <strong>Ctrl+V</strong>, clique em <strong>Search</strong> e no jogador. Só o tarkov.dev consegue achar a conta pelo nome.</p>
+        <p><strong>Para abrir direto da próxima vez:</strong> copie o endereço do perfil que abriu e cole aqui. O jogador fica salvo com o ID (marca <strong>ID</strong> abaixo) e passa a abrir com um clique. Também dá para digitar <strong>nome ID</strong> juntos.</p>
       </div>
       <p class="drawer-foot">Perfis do <a href="https://tarkov.dev/players" target="_blank" rel="noopener noreferrer">tarkov.dev</a></p>
     </div>

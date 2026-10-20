@@ -59,11 +59,12 @@ Os dados vêm dos arquivos públicos da [tarkov.dev](https://tarkov.dev), os mes
 
 ## Perfil de jogadores (Escape from Tarkov)
 
-O botão **👤 Players** abre um painel para ver o perfil de um jogador: digite o **nome exato** (maiúsculas não importam), escolha **Season / PvP / PvE** e aperte **Enter**. O perfil abre no [tarkov.dev](https://tarkov.dev/players) numa aba nova, com nível, facção, estatísticas de PMC, conquistas e equipamento. Os últimos nomes buscados ficam salvos no painel para abrir de novo com um clique.
+O botão **👤 Players** abre o perfil de um jogador no [tarkov.dev](https://tarkov.dev/players), numa aba nova (nível, facção, estatísticas de PMC, conquistas e equipamento), em **Season / PvP / PvE**.
 
-Não existe API pública de perfis: a do tarkov.dev exige um captcha que só funciona no site deles. Por isso o perfil abre lá, e não dentro deste site.
+- **Pelo nome:** o site copia o nome e abre a busca do tarkov.dev. Lá, aperte **Ctrl+V**, clique em **Search** e no jogador.
+- **Pelo ID ou link:** cole o endereço do perfil (ex.: `https://tarkov.dev/players/pvp-season/1234567`) ou só o número da conta, e o perfil abre direto. Colando o link logo depois de buscar um nome, o jogador fica salvo com nome e ID nos recentes (marca **ID**) e passa a abrir com um clique. Também dá para digitar `nome ID` juntos.
 
-Se o tarkov.dev mostrar **“Turnstile token expired”**, aperte **F5** na página do perfil. É uma falha deles ao abrir pelo nome: o captcha só vale uma vez e é gasto para descobrir o ID da conta. Depois do F5, o número no fim do endereço é o **ID da conta**; o painel também aceita esse ID, e por ele o perfil abre de primeira.
+Por que não abre direto pelo nome: não existe API pública de perfis, e a do tarkov.dev exige um captcha que só funciona no site deles. Só a busca do tarkov.dev consegue trocar o nome pelo ID da conta; abrir o perfil pelo nome no endereço falha com “Turnstile token expired”, porque o captcha só vale uma vez.
 
 ## Tarefas (Escape from Tarkov)
 
