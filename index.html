@@ -9,58 +9,75 @@
 </head>
 <body>
   <form id="join" class="card">
-    <h1>📺 Tela</h1>
-    <p class="muted">Compartilhe a tela com os amigos pelo navegador, com o mínimo de atraso.</p>
+    <div class="brand">
+      <span class="logo">📺</span>
+      <div>
+        <h1>Tela</h1>
+        <p class="muted">Compartilhe a tela com os amigos, com o mínimo de atraso.</p>
+      </div>
+    </div>
     <label>Seu nome
       <input id="name" maxlength="32" placeholder="Ex.: João" autocomplete="nickname" required>
     </label>
     <label>Sala
-      <input id="room" maxlength="64" required>
+      <input id="room" maxlength="64" required spellcheck="false">
     </label>
-    <label>Senha da sala <span class="small">(opcional)</span>
+    <label><span>Senha da sala <span class="optional">opcional</span></span>
       <input id="password" type="password" maxlength="64" autocomplete="off" placeholder="Combine com os amigos">
     </label>
     <button class="primary" type="submit">Entrar</button>
-    <p class="muted small">Quem entrar na mesma sala vê as telas compartilhadas. Com senha, todos precisam digitar a mesma. Ela não vai no link: mande por outro meio.</p>
+    <p class="hint">Quem entrar na mesma sala vê as telas compartilhadas. Com senha, todos precisam digitar a mesma. Ela não vai no link: mande por outro meio.</p>
   </form>
 
   <main id="app" hidden>
     <header class="bar">
-      <strong class="title">📺 Sala <span id="roomName"></span></strong>
-      <span id="noPassword" class="warn" title="Quem souber o nome da sala entra e vê sua tela. Para usar senha, recarregue a página e preencha o campo Senha." hidden>⚠ Sala sem senha</span>
-      <button id="copy" type="button">Copiar link</button>
+      <span class="logo small-logo">📺</span>
+      <div class="room">
+        <span class="room-label">Sala</span>
+        <strong id="roomName" class="room-name"></strong>
+      </div>
+      <span id="noPassword" class="warn" title="Quem souber o nome da sala entra e vê sua tela. Para usar senha, recarregue a página e preencha o campo Senha." hidden>⚠ Sem senha</span>
+      <button id="copy" type="button" class="ghost">Copiar link</button>
       <div class="spacer"></div>
-      <label>Qualidade
-        <select id="quality">
-          <option value="squad" selected>Squad · 720p · 60 fps</option>
-          <option value="light">Leve · 720p · 30 fps</option>
-          <option value="720">720p · 60 fps</option>
-          <option value="1080">1080p · 60 fps</option>
-          <option value="1440">1440p · 60 fps</option>
-          <option value="0">Original · 60 fps</option>
-        </select>
-      </label>
-      <label>Modo
-        <select id="mode">
-          <option value="motion">Fluidez (jogos, vídeos)</option>
-          <option value="detail">Nitidez (texto, código)</option>
-        </select>
-      </label>
-      <label>Codec
-        <select id="codec">
-          <option value="H264">H.264 (recomendado)</option>
-          <option value="VP8">VP8</option>
-          <option value="VP9">VP9</option>
-          <option value="AV1">AV1</option>
-        </select>
-      </label>
-      <label class="check" title="Tela inteira: áudio do PC todo. Janela: só o áudio daquela janela. Aba: só o áudio da aba. Lembre de marcar a opção de áudio na janela de escolha do navegador.">
-        <input type="checkbox" id="audio" checked> Áudio
-      </label>
-      <label title="Mistura outra entrada de áudio na transmissão. Para o TeamSpeak: mande a saída dele para um cabo virtual (ex.: VB-Cable) e escolha o cabo aqui.">Áudio extra
-        <select id="extraAudio"><option value="">Nenhum</option></select>
-      </label>
-      <button id="pip" type="button" title="Abre uma janela por cima dos outros programas com as telas dos amigos. Abra antes de entrar no jogo (o jogo precisa estar em modo sem bordas/Borderless).">Abrir PiP</button>
+
+      <details class="settings">
+        <summary>⚙ Ajustes</summary>
+        <div class="settings-panel">
+          <label>Qualidade
+            <select id="quality">
+              <option value="squad" selected>Squad · 720p · 60 fps</option>
+              <option value="light">Leve · 720p · 30 fps</option>
+              <option value="720">720p · 60 fps</option>
+              <option value="1080">1080p · 60 fps</option>
+              <option value="1440">1440p · 60 fps</option>
+              <option value="0">Original · 60 fps</option>
+            </select>
+          </label>
+          <label>Modo
+            <select id="mode">
+              <option value="motion">Fluidez (jogos, vídeos)</option>
+              <option value="detail">Nitidez (texto, código)</option>
+            </select>
+          </label>
+          <label>Codec
+            <select id="codec">
+              <option value="H264">H.264 (recomendado)</option>
+              <option value="VP8">VP8</option>
+              <option value="VP9">VP9</option>
+              <option value="AV1">AV1</option>
+            </select>
+          </label>
+          <label title="Mistura outra entrada de áudio na transmissão. Para o TeamSpeak: mande a saída dele para um cabo virtual (ex.: VB-Cable) e escolha o cabo aqui.">Áudio extra
+            <select id="extraAudio"><option value="">Nenhum</option></select>
+          </label>
+          <label class="check" title="Tela inteira: áudio do PC todo. Janela: só o áudio daquela janela. Aba: só o áudio da aba. Lembre de marcar a opção de áudio na janela de escolha do navegador.">
+            <input type="checkbox" id="audio" checked> Enviar áudio junto com a tela
+          </label>
+          <p class="hint">Áudio e áudio extra valem a partir da próxima vez que você compartilhar.</p>
+        </div>
+      </details>
+
+      <button id="pip" type="button" class="ghost" title="Abre uma janela por cima dos outros programas com as telas dos amigos. Abra antes de entrar no jogo (o jogo precisa estar em modo sem bordas/Borderless).">Abrir PiP</button>
       <button id="share" class="primary" type="button">Compartilhar tela</button>
     </header>
 
@@ -70,7 +87,7 @@
         <ul id="people"></ul>
       </aside>
       <section id="grid">
-        <p id="empty" class="muted">Ninguém está compartilhando ainda.</p>
+        <p id="empty">Ninguém está compartilhando ainda.<span>Quando alguém compartilhar, a tela aparece aqui.</span></p>
       </section>
     </div>
   </main>

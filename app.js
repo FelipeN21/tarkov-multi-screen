@@ -702,6 +702,13 @@ function renderPeople() {
   }
 }
 
+// O painel de ajustes fecha ao clicar fora dele ou apertar Esc.
+document.addEventListener('click', (e) => {
+  const settings = $('.settings');
+  if (settings.open && !settings.contains(e.target)) settings.open = false;
+});
+document.addEventListener('keydown', (e) => e.key === 'Escape' && ($('.settings').open = false));
+
 $('#copy').addEventListener('click', async () => {
   try {
     await navigator.clipboard.writeText(location.href);
