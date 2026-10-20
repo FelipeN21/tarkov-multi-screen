@@ -130,6 +130,8 @@ select {
   cursor: pointer;
 }
 select:disabled { opacity: .4; cursor: not-allowed; }
+/* A lista que abre é desenhada pelo navegador: cores sólidas para ficar legível em qualquer um. */
+select option, select optgroup { background-color: var(--surface); color: var(--text); }
 input::placeholder { color: var(--muted-2); }
 input[type="checkbox"] { width: 16px; height: 16px; margin: 0; accent-color: var(--accent); cursor: pointer; }
 
@@ -157,7 +159,7 @@ button.link:hover { background: none; text-decoration: underline; }
 .icon-btn { justify-content: center; width: 34px; height: 34px; padding: 0 !important; border-radius: 50% !important; }
 
 /* Ícones de linha (estilo SF Symbols) nos botões da barra */
-.bar button::before, .settings summary::before {
+.bar button:not(.link)::before, .settings summary::before {
   content: "";
   flex-shrink: 0;
   width: 16px;
@@ -166,7 +168,7 @@ button.link:hover { background: none; text-decoration: underline; }
   -webkit-mask: var(--icon) center / contain no-repeat;
   mask: var(--icon) center / contain no-repeat;
 }
-.bar button, .settings summary { display: inline-flex; align-items: center; gap: 7px; }
+.bar button:not(.link), .settings summary { display: inline-flex; align-items: center; gap: 7px; }
 #paletteBtn { --icon: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round'><circle cx='11' cy='11' r='7'/><path d='m20 20-3.5-3.5'/></svg>"); }
 #copy { --icon: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><path d='M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71'/><path d='M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71'/></svg>"); }
 .settings summary { --icon: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round'><path d='M4 6h9M17 6h3M4 12h3M11 12h9M4 18h11M19 18h1'/><circle cx='15' cy='6' r='2'/><circle cx='9' cy='12' r='2'/><circle cx='17' cy='18' r='2'/></svg>"); }
