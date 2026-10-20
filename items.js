@@ -10,14 +10,17 @@ const REFRESH_MS = 10 * 60 * 1000;
 
 const $ = (s) => document.querySelector(s);
 const lists = {}; // modo -> { time, items, updated } (ou uma Promise enquanto carrega)
-let mode = 'regular';
+// Modos de jogo da tarkov.dev (cada um com preços próprios). O Season é o padrão.
+const MODES = { 'pvp-season': 'Season', regular: 'PvP', pve: 'PvE' };
+let mode = 'pvp-season';
 
 const rub = (n) => new Intl.NumberFormat('pt-BR').format(n) + ' ₽';
 const fold = (s) => (s || '').normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase();
 const safeUrl = (u) => (typeof u === 'string' && u.startsWith('https://') ? u : null);
 
 try {
-  if (localStorage.getItem('tela:itemMode') === 'pve') mode = 'pve';
+  const saved = localStorage.getItem('tela:itemGameMode');
+  if (MODES[saved]) mode = saved;
 } catch {}
 
 // ---------- abrir / fechar o painel ----------
@@ -36,7 +39,7 @@ $('#itemsBtn').addEventListener('click', () => ($('#itemsPanel').hidden ? openPa
 $('#itemsClose').addEventListener('click', closePanel);
 document.addEventListener('keydown', (e) => e.key === 'Escape' && !$('#itemsPanel').hidden && closePanel());
 
-// ---------- PvP / PvE ----------
+// ---------- Season / PvP / PvE ----------
 function renderMode() {
   for (const b of document.querySelectorAll('#itemMode button')) b.classList.toggle('on', b.dataset.mode === mode);
 }
@@ -44,7 +47,7 @@ for (const b of document.querySelectorAll('#itemMode button')) {
   b.addEventListener('click', () => {
     if (mode === b.dataset.mode) return;
     mode = b.dataset.mode;
-    try { localStorage.setItem('tela:itemMode', mode); } catch {}
+    try { localStorage.setItem('tela:itemGameMode', mode); } catch {}
     renderMode();
     if ($('#itemQuery').value.trim()) search();
     else ensureList().catch(() => {});
@@ -66,7 +69,7 @@ async function getJSON(path) {
   return (await res.json()).data;
 }
 
-// Os nomes são iguais no PvP e no PvE: baixa uma vez só.
+// Os nomes são iguais em todos os modos: baixa uma vez só.
 let names = null;
 function loadNames() {
   names ??= Promise.all([
@@ -178,7 +181,7 @@ async function search() {
 
   $('#itemResults').replaceChildren(...found.slice(0, MAX_RESULTS).map(renderItem));
   $('#itemResults').scrollTop = 0;
-  const modeName = mode === 'pve' ? 'PvE' : 'PvP';
+  const modeName = MODES[mode];
   if (!found.length) status(`Nenhum item encontrado para “${raw}” (${modeName}).`, 'warn');
   else if (found.length > MAX_RESULTS) status(`${found.length} itens · mostrando os ${MAX_RESULTS} primeiros · ${modeName}. Digite mais para filtrar.`);
   else status(`${found.length} ${found.length === 1 ? 'item' : 'itens'} · ${modeName}`);

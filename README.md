@@ -53,7 +53,7 @@ O botão **🔎 Itens** abre um painel para consultar o preço de um item sem sa
 
 - Digite parte do nome, em inglês ou português (ex.: `ledx`, `gpu`, `salewa`, `transiluminador`), e aperte **Enter**.
 - Para cada item aparecem a menor oferta atual no mercado (com a variação em 48 h), a média de 24 h, quanto o melhor comerciante paga e, em itens com mais de um slot, o valor por slot. O nome leva para a wiki.
-- **PvP / PvE**: os preços do PvE são separados.
+- **Season / PvP / PvE**: cada modo tem preços próprios. O **Season** é o padrão; o site lembra o último modo que você escolheu.
 
 Os dados vêm dos arquivos públicos da [tarkov.dev](https://tarkov.dev), os mesmos que o site deles usa. A API GraphQL da tarkov.dev estava fora do ar quando isto foi feito. A lista (~2 MB) é baixada uma vez quando você abre o painel, e a busca roda no seu navegador: digitar e buscar não fazem novas requisições, e a lista só é baixada de novo depois de 10 minutos. Esses arquivos não têm documentação oficial; se mudarem, o painel avisa que não conseguiu baixar os preços.
 
