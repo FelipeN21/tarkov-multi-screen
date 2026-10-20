@@ -3,6 +3,11 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
+  <!-- Política de segurança (CSP): de onde a página pode carregar scripts, imagens e conexões.
+       Scripts só do próprio site (e o script do tema abaixo, autorizado pela "impressão digital"
+       sha256 dele: se mudar uma letra dele, gere o hash de novo). Dados só da tarkov.dev; wss: são
+       os relays que ligam as pessoas da sala. -->
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-Xx9OfsL4bsVDChsDJQBV28ienmE4mG++sRQ6THnmsF4='; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https://assets.tarkov.dev; connect-src 'self' https://json.tarkov.dev wss:; media-src 'self' blob:; worker-src 'self'; manifest-src 'self'; font-src 'self'; object-src 'none'; frame-src 'none'; base-uri 'self'; form-action 'self'">
   <title>Tela</title>
   <link rel="icon" href="logo.svg" type="image/svg+xml">
   <link rel="manifest" href="manifest.webmanifest">
@@ -50,14 +55,16 @@
       <button id="copy" type="button" class="ghost icon-btn" title="Copiar o link da sala" aria-label="Copiar o link da sala"></button>
       <div class="spacer"></div>
       <nav class="toolgroup" aria-label="Ferramentas do Escape from Tarkov">
-        <span id="tarkovClock" class="toolgroup-label tk-clock" title="Hora no Tarkov: os dois horários de raid (Factory e The Lab têm horário fixo)">Tarkov</span>
-        <button id="paletteBtn" type="button" class="ghost icon-btn" title="Busca rápida (Ctrl+K)" aria-label="Busca rápida"></button>
-        <button id="itemsBtn" type="button" class="ghost drawer-btn" title="Preços de itens"><span class="lbl">Itens</span></button>
-        <button id="playersBtn" type="button" class="ghost drawer-btn" title="Perfil de um jogador"><span class="lbl">Players</span></button>
-        <button id="tasksBtn" type="button" class="ghost drawer-btn" title="Tarefas: o que fazer e itens necessários"><span class="lbl">Tasks</span></button>
-        <button id="mapsBtn" type="button" class="ghost drawer-btn" title="Mapas com as extrações"><span class="lbl">Mapas</span></button>
-        <button id="ammoBtn" type="button" class="ghost drawer-btn" title="Tabela de munição por calibre"><span class="lbl">Munição</span></button>
-        <button id="wishBtn" type="button" class="ghost drawer-btn" title="Wishlist do squad: itens que cada um precisa"><span class="lbl">Wishlist</span><span id="wishCount" class="tool-count"></span></button>
+        <button id="toolsToggle" type="button" class="toolgroup-label" aria-expanded="true" aria-controls="toolsItems" title="Mostrar/ocultar as ferramentas do Tarkov">Tarkov</button>
+        <span id="toolsItems" class="toolgroup-items">
+          <button id="paletteBtn" type="button" class="ghost icon-btn" title="Busca rápida (Ctrl+K)" aria-label="Busca rápida"></button>
+          <button id="itemsBtn" type="button" class="ghost drawer-btn" title="Preços de itens"><span class="lbl">Itens</span></button>
+          <button id="playersBtn" type="button" class="ghost drawer-btn" title="Perfil de um jogador"><span class="lbl">Players</span></button>
+          <button id="tasksBtn" type="button" class="ghost drawer-btn" title="Tarefas: o que fazer e itens necessários"><span class="lbl">Tasks</span></button>
+          <button id="mapsBtn" type="button" class="ghost drawer-btn" title="Mapas com as extrações"><span class="lbl">Mapas</span></button>
+          <button id="ammoBtn" type="button" class="ghost drawer-btn" title="Tabela de munição por calibre"><span class="lbl">Munição</span></button>
+          <button id="wishBtn" type="button" class="ghost drawer-btn" title="Wishlist do squad: itens que cada um precisa"><span class="lbl">Wishlist</span><span id="wishCount" class="tool-count"></span></button>
+        </span>
       </nav>
       <button id="pip" type="button" class="ghost" title="Abre uma janela por cima dos outros programas com as telas dos amigos. Abra antes de entrar no jogo (o jogo precisa estar em modo sem bordas/Borderless).">Abrir PiP</button>
       <button type="button" class="ghost icon-btn theme-toggle" title="Alternar tema claro/escuro" aria-label="Alternar tema claro/escuro"></button>
@@ -326,6 +333,5 @@
   <script type="module" src="maps.js"></script>
   <script type="module" src="palette.js"></script>
   <script type="module" src="ammo.js"></script>
-  <script type="module" src="tarkov-time.js"></script>
 </body>
 </html>

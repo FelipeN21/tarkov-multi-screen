@@ -40,6 +40,14 @@ O botão **Abrir PiP** abre uma janela pequena que fica por cima de todos os pro
   - **🔇/🔊 e barra de volume**: liga, desliga e ajusta o som daquele amigo.
 - O tamanho da janela, o layout, quem aparece e os recortes ficam salvos para a próxima vez.
 
+## Segurança
+
+- **Dados de outros PCs** (nomes, Jams, wishlist) aparecem sempre como texto, nunca como HTML. Antes disso, nomes e itens são limpos: sem `<` `>`, sem caracteres de controle e sem caracteres invisíveis ou de inversão de direção (usados para disfarçar nomes). Links de Jam são validados e remontados (veja *Spotify Jams*).
+- **Limite contra spam:** cada pessoa pode mandar no máximo uma atualização por segundo de estado (nome, transmissão, Jam) e de wishlist. Se mandar mais, vale só a última. Mensagens com formato errado são descartadas.
+- **Política de segurança (CSP)** no `index.html`: o navegador só roda scripts do próprio site e só carrega dados da tarkov.dev, ícones de `assets.tarkov.dev` e as conexões dos relays (`wss:`). Mesmo que um erro futuro deixasse passar HTML de alguém, um script injetado não rodaria.
+  - O pequeno script do tema dentro do `<head>` é autorizado pela "impressão digital" (hash `sha256`) dele, que está na CSP. **Se mudar qualquer caractere desse script, o hash precisa ser recalculado**, senão o tema salvo deixa de ser aplicado ao abrir a página (o navegador mostra o hash certo no console).
+  - Se um dia usar outro serviço (por exemplo, uma API nova), o endereço dele precisa entrar na CSP.
+
 ## Publicar no GitHub Pages
 
 1. Suba esta pasta para um repositório público.
@@ -55,10 +63,7 @@ Por segurança, só são aceitos links `https` de `spotify.link` (o link curto d
 
 ## Ferramentas do Tarkov (grupo na barra)
 
-O grupo **Tarkov** da barra reúne a busca rápida, Itens, Players, Tasks, Mapas, Munição e Wishlist. Em telas mais estreitas, os botões ficam só com o ícone (o nome aparece ao passar o mouse).
-
-### Hora do Tarkov
-No começo do grupo ficam os **dois horários de raid** do jogo (☀ dia / ☾ noite), que andam 7× mais rápido que o relógio real. É a mesma conta do tarkov.dev. Factory e The Lab têm horário fixo e não seguem esse relógio.
+O grupo **Tarkov** da barra reúne a busca rápida, Itens, Players, Tasks, Mapas, Munição e Wishlist. Clique em **Tarkov** para recolher ou mostrar o grupo (fica salvo; o Ctrl+K funciona mesmo recolhido). Em telas mais estreitas, os botões ficam só com o ícone (o nome aparece ao passar o mouse).
 
 ### Wishlist do squad
 Cada um lista os itens que precisa (quests, hideout) e todos da sala veem, para pegar para o amigo na raid. Dá para adicionar:
@@ -196,7 +201,7 @@ Algumas opções são o Metered.ca (tem plano grátis), o Cloudflare Calls TURN 
 - `jams.js`: Spotify Jams da sala (com o validador de links).
 - `wishlist.js`: wishlist do squad.
 - `ammo.js`: tabela de munição.
-- `tarkov-time.js`: hora do Tarkov.
+- `sanitize.js`: limpeza de nomes e textos vindos de outros PCs.
 - `manifest.webmanifest`, `sw.js`, `icon-*.png`: instalar como app (PWA).
 - `icons.js` e `logo.svg`: ícones e logo.
 - `vendor/trystero.js`: Trystero 0.26.0 (estratégia Nostr) empacotado num arquivo só, licença MIT.

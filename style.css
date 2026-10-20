@@ -270,15 +270,18 @@ body:has(#app:not([hidden])) .join-footer { display: none; }
 /* Ferramentas do Escape from Tarkov agrupadas, como um seletor do macOS */
 .toolgroup { display: inline-flex; align-items: center; gap: 2px; padding: 3px; border-radius: 12px; background: var(--input); }
 .toolgroup-label { padding: 0 6px 0 8px; color: var(--muted); font-size: 11px; font-weight: 600; letter-spacing: .04em; text-transform: uppercase; }
+/* "Tarkov" é um botão: recolhe/mostra as ferramentas (a setinha indica o estado). */
+.bar button.toolgroup-label { gap: 4px; height: 30px; padding: 0 8px 0 10px; border-radius: 9px; background: none; }
+.bar button.toolgroup-label:hover { background: var(--fill); color: var(--text); }
+.bar button.toolgroup-label::before { content: none; }
+.bar button.toolgroup-label::after { content: "‹"; margin-top: -2px; font-size: 16px; line-height: 1; letter-spacing: 0; }
+.toolgroup.collapsed button.toolgroup-label::after { content: "›"; }
+.toolgroup-items { display: inline-flex; align-items: center; gap: 2px; }
+.toolgroup.collapsed .toolgroup-items { display: none; }
 .toolgroup button { padding: 5px 11px; border-radius: 9px; }
 .toolgroup .icon-btn { width: 30px; height: 30px; }
 .toolgroup .drawer-btn.on { background: var(--seg-on); box-shadow: 0 2px 6px rgba(0, 0, 0, .18); }
 
-/* Relógio do Tarkov (no lugar do rótulo do grupo) */
-.tk-clock { display: inline-flex; gap: 8px; text-transform: none; letter-spacing: 0; font-variant-numeric: tabular-nums; cursor: help; }
-.tk-time { display: inline-flex; align-items: center; gap: 4px; color: var(--text); font-size: 12px; font-weight: 600; }
-.tk-time .ic { width: 13px; height: 13px; color: var(--warn); }
-.tk-time.night .ic { color: #8e8cf0; }
 .tool-count:not(:empty) { margin-left: 2px; padding: 0 6px; border-radius: 999px; background: var(--accent); color: #fff; font-size: 10.5px; font-weight: 700; line-height: 16px; }
 
 /* Barra mais estreita: as ferramentas ficam só com ícone (o nome aparece ao passar o mouse). */
@@ -559,7 +562,7 @@ body:has(#app:not([hidden])) #banner { top: 66px; }
 
 @media (max-width: 760px) {
   .bar { padding: 10px 16px; }
-  .toolgroup-label, .toolgroup .lbl { display: none; }
+  .toolgroup .lbl { display: none; }
   .toolgroup button { padding: 5px 9px; }
   #banner { top: auto !important; bottom: 16px; right: 16px; left: 16px; max-width: none; }
   .room-name { max-width: 160px; }

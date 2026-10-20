@@ -6,6 +6,7 @@ import { pipSupported, connectPip, openPip, closePip, isPipOpen, refreshPip } fr
 import { icon } from './icons.js';
 import { connectJams, renderJams, canonicalJam } from './jams.js';
 import { connectWishlist, receiveWishlist, dropWishlist, sendMyWishlist, renderWishlist } from './wishlist.js';
+import { cleanText } from './sanitize.js';
 
 const APP_ID = 'tela-compartilhar-tela-v1';
 // Aparece no rodapé, nos ajustes e no "Sobre": ajuda a saber se o navegador está com a versão nova.
@@ -99,7 +100,7 @@ if (load('audio') === '0') $('#audio').checked = false;
 $('#join').addEventListener('submit', async (e) => {
   e.preventDefault();
   if (room) return;
-  myName = $('#name').value.trim().slice(0, 32) || 'Anônimo';
+  myName = cleanText($('#name').value, 32) || 'Anônimo';
   const roomName = roomKey($('#room').value);
   if (!roomName) return;
   const secret = $('#password').value;
@@ -129,11 +130,12 @@ $('#join').addEventListener('submit', async (e) => {
   });
   stateAction = room.makeAction('state');
   sigAction = room.makeAction('sig');
-  stateAction.onMessage = (data, { peerId }) => enqueue(() => onState(peerId, data));
+  // Mensagens com formato errado são descartadas antes do limite, para não tomarem o lugar das válidas.
+  stateAction.onMessage = (data, { peerId }) => data && typeof data === 'object' && !Array.isArray(data) && stateIn(data, peerId);
   sigAction.onMessage = (data, { peerId }) => enqueue(() => onSignal(peerId, data));
   // Wishlist em um canal próprio (a lista pode ter dezenas de itens).
   wishAction = room.makeAction('wish');
-  wishAction.onMessage = (data, { peerId }) => receiveWishlist(peerId, data);
+  wishAction.onMessage = (data, { peerId }) => Array.isArray(data) && wishIn(data, peerId);
   room.onPeerJoin = (peerId) => {
     sendState(peerId);
     sendMyWishlist(peerId);
@@ -177,6 +179,35 @@ $('#join').addEventListener('submit', async (e) => {
   }
 });
 
+// Cada pessoa pode mandar no máximo uma atualização por segundo de estado (nome, transmissão, Jam)
+// e de wishlist. Se mandar mais, vale só a última: o spam fica de fora, sem perder o estado final.
+// (As mensagens de conexão WebRTC não passam por aqui: elas chegam em rajadas normais.)
+function perPeerThrottle(fn, ms = 1000) {
+  const peers = new Map();
+  const handle = (data, peerId) => {
+    let s = peers.get(peerId);
+    if (!s) peers.set(peerId, (s = { last: 0, timer: null, data: null }));
+    s.data = data;
+    if (s.timer) return;
+    const run = () => {
+      s.timer = null;
+      s.last = Date.now();
+      fn(peerId, s.data);
+    };
+    const wait = s.last + ms - Date.now();
+    if (wait <= 0) run();
+    else s.timer = setTimeout(run, wait);
+  };
+  // Quem saiu da sala: descarta o que estava esperando (senão a pessoa "voltaria" na lista).
+  handle.forget = (peerId) => {
+    clearTimeout(peers.get(peerId)?.timer);
+    peers.delete(peerId);
+  };
+  return handle;
+}
+const stateIn = perPeerThrottle((peerId, data) => enqueue(() => onState(peerId, data)));
+const wishIn = perPeerThrottle((peerId, data) => receiveWishlist(peerId, data));
+
 // JSON ida e volta transforma RTCSessionDescription/RTCIceCandidate em objetos simples.
 const signal = (to, data) => sigAction.send(JSON.parse(JSON.stringify(data)), { target: to }).catch(() => {});
 
@@ -186,9 +217,10 @@ function sendState(target = null) {
 }
 
 async function onState(peerId, data) {
+  if (!data || typeof data !== 'object') return; // mensagem estranha de outro PC: ignora
   const isNew = !people.has(peerId);
   // A Jam vem de outro PC: só entra se for mesmo um link do Spotify (validada de novo aqui).
-  people.set(peerId, { name: String(data.name || 'Anônimo').slice(0, 32), sharing: !!data.sharing, jam: canonicalJam(data.jam) });
+  people.set(peerId, { name: cleanText(data.name, 32) || 'Anônimo', sharing: !!data.sharing, jam: canonicalJam(data.jam) });
   const tile = tiles.get(peerId);
   if (tile) {
     tile.label.textContent = people.get(peerId).name;
@@ -200,6 +232,8 @@ async function onState(peerId, data) {
 }
 
 function onPeerLeave(peerId) {
+  stateIn.forget(peerId);
+  wishIn.forget(peerId);
   people.delete(peerId);
   dropWishlist(peerId);
   closeSend(peerId);
@@ -777,6 +811,16 @@ for (const b of document.querySelectorAll('.theme-toggle')) {
     save('theme', light ? 'light' : 'dark');
   });
 }
+
+// Grupo "Tarkov": clicar no nome recolhe ou mostra as ferramentas (a escolha fica salva).
+// A busca rápida (Ctrl+K) continua funcionando com o grupo recolhido.
+function setTools(open) {
+  $('.toolgroup').classList.toggle('collapsed', !open);
+  $('#toolsToggle').setAttribute('aria-expanded', open);
+  save('tools', open ? '1' : '0');
+}
+setTools(load('tools') !== '0');
+$('#toolsToggle').addEventListener('click', () => setTools($('#toolsToggle').getAttribute('aria-expanded') !== 'true'));
 
 // O painel de ajustes fecha ao clicar fora dele ou apertar Esc.
 document.addEventListener('click', (e) => {

@@ -5,6 +5,7 @@
 import { openDrawer, closeDrawer } from './tarkov-data.js';
 import { icon } from './icons.js';
 import { quickFind } from './items.js';
+import { cleanText } from './sanitize.js';
 
 const MAX_ITEMS = 60;
 const ID_RE = /^[0-9a-f]{24}$/;
@@ -17,7 +18,7 @@ let mine = [];
 // ---------- validação (vale para a sua lista e para a dos outros) ----------
 export function cleanEntry(e) {
   if (!e || typeof e !== 'object') return null;
-  const name = typeof e.name === 'string' ? e.name.trim().slice(0, 80) : '';
+  const name = typeof e.name === 'string' ? cleanText(e.name, 80) : '';
   if (!name) return null;
   return {
     id: typeof e.id === 'string' && ID_RE.test(e.id) ? e.id : null,
