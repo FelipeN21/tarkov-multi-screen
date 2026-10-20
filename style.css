@@ -169,6 +169,8 @@ button.link:hover { background: none; text-decoration: underline; }
   mask: var(--icon) center / contain no-repeat;
 }
 .bar button:not(.link), .settings summary { display: inline-flex; align-items: center; gap: 7px; }
+#ammoBtn { --icon: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round'><circle cx='12' cy='12' r='8'/><circle cx='12' cy='12' r='2'/><path d='M12 1v5M12 18v5M1 12h5M18 12h5'/></svg>"); }
+#wishBtn { --icon: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><path d='M19 14c1.5-1.5 3-3.2 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.8 0-3 .5-4.5 2-1.5-1.5-2.7-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4 3 5.5l7 7z'/></svg>"); }
 #paletteBtn { --icon: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round'><circle cx='11' cy='11' r='7'/><path d='m20 20-3.5-3.5'/></svg>"); }
 #copy { --icon: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><path d='M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71'/><path d='M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71'/></svg>"); }
 .settings summary { --icon: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round'><path d='M4 6h9M17 6h3M4 12h3M11 12h9M4 18h11M19 18h1'/><circle cx='15' cy='6' r='2'/><circle cx='9' cy='12' r='2'/><circle cx='17' cy='18' r='2'/></svg>"); }
@@ -271,6 +273,19 @@ body:has(#app:not([hidden])) .join-footer { display: none; }
 .toolgroup button { padding: 5px 11px; border-radius: 9px; }
 .toolgroup .icon-btn { width: 30px; height: 30px; }
 .toolgroup .drawer-btn.on { background: var(--seg-on); box-shadow: 0 2px 6px rgba(0, 0, 0, .18); }
+
+/* Relógio do Tarkov (no lugar do rótulo do grupo) */
+.tk-clock { display: inline-flex; gap: 8px; text-transform: none; letter-spacing: 0; font-variant-numeric: tabular-nums; cursor: help; }
+.tk-time { display: inline-flex; align-items: center; gap: 4px; color: var(--text); font-size: 12px; font-weight: 600; }
+.tk-time .ic { width: 13px; height: 13px; color: var(--warn); }
+.tk-time.night .ic { color: #8e8cf0; }
+.tool-count:not(:empty) { margin-left: 2px; padding: 0 6px; border-radius: 999px; background: var(--accent); color: #fff; font-size: 10.5px; font-weight: 700; line-height: 16px; }
+
+/* Barra mais estreita: as ferramentas ficam só com ícone (o nome aparece ao passar o mouse). */
+@media (max-width: 1560px) {
+  .toolgroup .lbl { display: none; }
+  .toolgroup button { padding: 5px 9px; }
+}
 
 /* Painel de ajustes */
 .settings { position: relative; }
@@ -398,6 +413,10 @@ aside h2 { margin: 2px 0 8px; padding: 0 8px; font-size: 12px; font-weight: 600;
 .jam-status.ok { color: var(--ok); }
 .jam-status.warn { color: var(--warn); }
 .jam-status.error { color: var(--danger); }
+.jam-foot { margin: 10px 2px 0; padding-top: 8px; border-top: 1px solid var(--line); color: var(--muted-2); font-size: 11.5px; }
+.jam-foot a { color: #1ed760; font-weight: 600; text-decoration: none; }
+.jam-foot a:hover { text-decoration: underline; }
+:root[data-theme="light"] .jam-foot a { color: #148a3e; }
 
 #grid {
   display: grid;
@@ -651,6 +670,62 @@ a.item-name:hover { color: var(--accent); }
   animation: shimmer 1.3s linear infinite;
 }
 
+/* Botão "+ Wishlist" nos cartões de itens e tarefas */
+.wish-add { padding: 3px 10px; border-radius: 999px; font-size: 12px; font-weight: 600; color: var(--accent); }
+.item .wish-add { grid-column: 2; justify-self: start; margin-top: 4px; }
+.wish-add.small { margin-left: auto; padding: 0; width: 24px; height: 24px; font-size: 15px; line-height: 1; }
+
+/* Wishlist do squad */
+.check-inline { display: inline-flex; align-items: center; gap: 6px; flex-shrink: 0; color: var(--text); font-size: 12.5px; cursor: pointer; }
+.wish-scroll { display: block; }
+.wish-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 4px; }
+#wishFound:empty { display: none; }
+.wish-group { margin-bottom: 14px; }
+.wish-group h3 { display: flex; align-items: center; gap: 6px; margin: 4px 2px 8px; font-size: 12px; font-weight: 600; color: var(--muted); }
+.wish, .wish-found { display: flex; align-items: center; gap: 8px; padding: 6px 8px; border-radius: 10px; background: var(--bg-2); font-size: 13px; }
+.wish-found .primary { margin-left: auto; padding: 4px 12px; font-size: 12.5px; }
+.wish-thumb { display: grid; place-items: center; flex-shrink: 0; width: 30px; height: 30px; overflow: hidden; border-radius: 7px; background: var(--surface); }
+.wish-thumb img { max-width: 100%; max-height: 100%; }
+.wish-name { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.wish-qty { flex-shrink: 0; font-weight: 700; font-variant-numeric: tabular-nums; }
+.wish-controls { display: flex; align-items: center; gap: 2px; margin-left: auto; flex-shrink: 0; }
+.wish-controls .wish-qty { min-width: 24px; text-align: center; }
+.wish-step { display: grid; place-items: center; width: 24px; height: 24px; padding: 0; border-radius: 50%; background: none; color: var(--muted); font-size: 15px; line-height: 1; }
+.wish-step:hover { background: var(--fill-hover); color: var(--text); }
+.wish-step .ic { width: 12px; height: 12px; }
+.wish-empty { margin: 0; padding: 6px 4px; color: var(--muted-2); font-size: 12.5px; list-style: none; }
+
+/* Tabela de munição */
+.drawer.wide-drawer { width: min(720px, calc(100% - 32px)); }
+#ammoCaliber { width: auto; min-width: 200px; flex-shrink: 0; }
+.ammo-head, .ammo-row { display: grid; grid-template-columns: minmax(0, 1fr) 54px 42px 50px 150px 86px 26px; align-items: center; gap: 8px; }
+.ammo-head { padding: 0 10px; color: var(--muted); font-size: 11px; font-weight: 600; }
+.ammo-head span:nth-child(n+2):nth-child(-n+4), .ammo-head span:nth-child(6) { text-align: right; }
+.ammo-rows { gap: 4px; }
+.ammo-row { padding: 7px 10px; border-radius: 10px; background: var(--bg-2); font-size: 13px; }
+.ammo-name { display: flex; flex-direction: column; min-width: 0; }
+.ammo-name strong { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-weight: 600; }
+.ammo-sub { color: var(--warn); font-size: 10.5px; }
+.ammo-sub:empty { display: none; }
+.ammo-num { text-align: right; font-variant-numeric: tabular-nums; }
+.ammo-num.strong { font-weight: 700; }
+.ammo-num.price { color: var(--muted); font-size: 12px; }
+.ammo-classes { display: flex; gap: 3px; }
+.ammo-class { display: inline-grid; place-items: center; width: 21px; height: 21px; border-radius: 5px; font-size: 11px; font-weight: 700; }
+.ammo-class.good { background: rgba(48, 209, 88, .22); color: var(--ok); }
+.ammo-class.some { background: rgba(255, 159, 10, .2); color: var(--warn); }
+.ammo-class.none { background: var(--fill); color: var(--muted-2); }
+.drawer-foot .ammo-class { width: 16px; height: 16px; font-size: 10px; vertical-align: -3px; }
+.ammo-add { display: grid; place-items: center; width: 26px; height: 26px; padding: 0; border-radius: 50%; color: var(--accent); font-size: 16px; line-height: 1; }
+
+/* Chefes e Goons no painel de mapas */
+.map-info { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+.map-bosses { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; color: var(--muted); font-size: 12.5px; }
+.map-info-label { font-weight: 600; color: var(--muted); }
+.boss { padding: 2px 9px; border-radius: 999px; background: var(--fill); color: var(--text); font-size: 12px; font-weight: 600; }
+.goons { margin-left: 6px; color: var(--muted); }
+.goons.here { color: var(--danger); font-weight: 600; }
+
 /* Busca de tarefas */
 .task {
   display: flex;
@@ -757,7 +832,10 @@ a.item-name:hover { color: var(--accent); }
 .player-note a:hover { text-decoration: underline; }
 
 @media (max-width: 760px) {
-  .drawer, .drawer.map-drawer { top: auto; left: 0; right: 0; bottom: 0; width: auto; height: 85vh; border-radius: 20px 20px 0 0; }
+  .ammo-head { display: none; }
+  .ammo-row { grid-template-columns: minmax(0, 1fr) 40px 36px 26px; }
+  .ammo-row > :nth-child(4), .ammo-row > :nth-child(5), .ammo-row > :nth-child(6) { display: none; }
+  .drawer, .drawer.map-drawer, .drawer.wide-drawer { top: auto; left: 0; right: 0; bottom: 0; width: auto; height: 85vh; border-radius: 20px 20px 0 0; }
 }
 
 /* ---------- Janelas: Sobre e busca rápida ---------- */

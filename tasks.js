@@ -4,6 +4,7 @@
 // Como na busca de itens, a lista é baixada uma vez ao abrir o painel e a busca roda no navegador.
 
 import { MODES, fold, safeUrl, searchText, getJSON, getOnce, openDrawer, closeDrawer, showSkeleton, clearSkeleton } from './tarkov-data.js';
+import { addToWishlist } from './wishlist.js';
 
 const MAX_RESULTS = 15;
 const MAX_OPTIONS = 3; // "any of": quantas opções mostrar pelo nome
@@ -121,7 +122,7 @@ async function loadList(m) {
         const label = ids.length === 1
           ? itemName(ids[0])
           : `Any of: ${ids.slice(0, MAX_OPTIONS).map(itemName).join(', ')}${ids.length > MAX_OPTIONS ? ` (+${ids.length - MAX_OPTIONS})` : ''}`;
-        add(`${o.type}:${ids.join()}:${!!o.foundInRaid}`, { name: label, icon: icon(ids[0]), count: o.count || 1, fir: !!o.foundInRaid, tag });
+        add(`${o.type}:${ids.join()}:${!!o.foundInRaid}`, { id: ids.length === 1 ? ids[0] : null, name: label, icon: icon(ids[0]), count: o.count || 1, fir: !!o.foundInRaid, tag });
       } else if (o.type === 'giveQuestItem' && o.questItem) {
         const q = data.questItems?.[o.questItem];
         add(`quest:${o.questItem}`, { name: en[`${o.questItem} Name`] || 'Quest item', icon: safeUrl(q?.iconLink) || icon(o.questItem), count: o.count || 1, tag: 'quest item' });
@@ -131,7 +132,7 @@ async function loadList(m) {
       const opts = k.keys || [];
       if (!opts.length) continue;
       const label = opts.length === 1 ? itemName(opts[0]) : `One of these keys: ${opts.slice(0, MAX_OPTIONS).map(itemName).join(', ')}`;
-      add(`key:${opts.join()}`, { name: label, icon: icon(opts[0]), count: 1, tag: 'key' });
+      add(`key:${opts.join()}`, { id: opts.length === 1 ? opts[0] : null, name: label, icon: icon(opts[0]), count: 1, tag: 'key' });
     }
 
     return {
@@ -277,6 +278,15 @@ function renderTask(t) {
         row.append(fir);
       }
       if (it.tag) row.append(el('span', 'badge', it.tag));
+      // Itens que dá para achar na raid (um item só, não "any of"): botão para a wishlist.
+      if (it.id) {
+        const wish = el('button', 'wish-add small', '+');
+        wish.type = 'button';
+        wish.title = 'Adicionar à sua wishlist';
+        wish.setAttribute('aria-label', wish.title);
+        wish.addEventListener('click', () => status(addToWishlist({ id: it.id, name: it.name, count: it.count, fir: it.fir }), 'ok'));
+        row.append(wish);
+      }
       ul.append(row);
     }
     li.append(ul);

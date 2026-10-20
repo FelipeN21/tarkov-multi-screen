@@ -5,6 +5,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Tela</title>
   <link rel="icon" href="logo.svg" type="image/svg+xml">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="apple-touch-icon" href="icon-192.png">
+  <meta name="theme-color" content="#000000">
   <link rel="stylesheet" href="style.css">
   <!-- Aplica o tema salvo antes de desenhar a página (o escuro é o padrão). -->
   <script>try { if (localStorage.getItem('tela:theme') === 'light') document.documentElement.dataset.theme = 'light'; } catch {}</script>
@@ -33,6 +36,7 @@
   </form>
   <footer id="joinFooter" class="join-footer">
     <span>Versão <span class="app-version"></span></span> · <button type="button" class="link about-open">Sobre</button>
+    <span class="install-app" hidden> · <button type="button" class="link">Instalar app</button></span>
   </footer>
 
   <main id="app" hidden>
@@ -46,12 +50,14 @@
       <button id="copy" type="button" class="ghost icon-btn" title="Copiar o link da sala" aria-label="Copiar o link da sala"></button>
       <div class="spacer"></div>
       <nav class="toolgroup" aria-label="Ferramentas do Escape from Tarkov">
-        <span class="toolgroup-label">Tarkov</span>
+        <span id="tarkovClock" class="toolgroup-label tk-clock" title="Hora no Tarkov: os dois horários de raid (Factory e The Lab têm horário fixo)">Tarkov</span>
         <button id="paletteBtn" type="button" class="ghost icon-btn" title="Busca rápida (Ctrl+K)" aria-label="Busca rápida"></button>
         <button id="itemsBtn" type="button" class="ghost drawer-btn" title="Preços de itens"><span class="lbl">Itens</span></button>
         <button id="playersBtn" type="button" class="ghost drawer-btn" title="Perfil de um jogador"><span class="lbl">Players</span></button>
         <button id="tasksBtn" type="button" class="ghost drawer-btn" title="Tarefas: o que fazer e itens necessários"><span class="lbl">Tasks</span></button>
         <button id="mapsBtn" type="button" class="ghost drawer-btn" title="Mapas com as extrações"><span class="lbl">Mapas</span></button>
+        <button id="ammoBtn" type="button" class="ghost drawer-btn" title="Tabela de munição por calibre"><span class="lbl">Munição</span></button>
+        <button id="wishBtn" type="button" class="ghost drawer-btn" title="Wishlist do squad: itens que cada um precisa"><span class="lbl">Wishlist</span><span id="wishCount" class="tool-count"></span></button>
       </nav>
       <button id="pip" type="button" class="ghost" title="Abre uma janela por cima dos outros programas com as telas dos amigos. Abra antes de entrar no jogo (o jogo precisa estar em modo sem bordas/Borderless).">Abrir PiP</button>
       <button type="button" class="ghost icon-btn theme-toggle" title="Alternar tema claro/escuro" aria-label="Alternar tema claro/escuro"></button>
@@ -90,7 +96,7 @@
             <input type="checkbox" id="audio" checked> Enviar áudio junto com a tela
           </label>
           <p class="hint">Áudio e áudio extra valem a partir da próxima vez que você compartilhar.</p>
-          <p class="settings-foot">Versão <span class="app-version"></span> · <button type="button" class="link about-open">Sobre</button> · <kbd>Ctrl</kbd>+<kbd>K</kbd> busca rápida</p>
+          <p class="settings-foot">Versão <span class="app-version"></span> · <button type="button" class="link about-open">Sobre</button> · <kbd>Ctrl</kbd>+<kbd>K</kbd> busca rápida<span class="install-app" hidden> · <button type="button" class="link">Instalar app</button></span></p>
         </div>
       </details>
 
@@ -186,6 +192,14 @@
         <button type="button" class="tab on" role="tab" aria-selected="true">Escape from Tarkov</button>
       </div>
       <div id="mapList" class="map-list"></div>
+      <div class="map-info">
+        <div id="mapMode" class="seg" title="Chances de chefes por modo">
+          <button type="button" data-mode="pvp-season">Season</button>
+          <button type="button" data-mode="regular">PvP</button>
+          <button type="button" data-mode="pve">PvE</button>
+        </div>
+        <div id="mapBosses" class="map-bosses"></div>
+      </div>
       <div id="mapViewer" class="map-viewer">
         <img id="mapImage" alt="Mapa" draggable="false" hidden>
         <p id="mapLoading" class="map-loading">Carregando o mapa…</p>
@@ -196,6 +210,52 @@
         </div>
       </div>
       <p id="mapCredit" class="drawer-foot"></p>
+    </div>
+
+    <div id="wishPanel" class="drawer" role="dialog" aria-label="Wishlist do squad" hidden>
+      <div class="drawer-head">
+        <h2>Wishlist do squad</h2>
+        <button id="wishClose" type="button" class="icon" title="Fechar (Esc)" aria-label="Fechar"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d='M18 6 6 18M6 6l12 12'/></svg></button>
+      </div>
+      <div class="tabs" role="tablist">
+        <button type="button" class="tab on" role="tab" aria-selected="true">Escape from Tarkov</button>
+      </div>
+      <form id="wishSearch" class="search">
+        <input id="wishQuery" maxlength="60" placeholder="Adicionar item (ex.: salewa, gpu)" autocomplete="off" spellcheck="false">
+        <button class="primary" type="submit">Buscar</button>
+      </form>
+      <div class="search-opts">
+        <label class="check-inline"><input type="checkbox" id="wishFir"> Precisa ser FIR</label>
+        <span id="wishStatus" class="item-status">Busque e adicione os itens que você precisa.</span>
+      </div>
+      <ul id="wishFound" class="wish-list"></ul>
+      <div class="results wish-scroll">
+        <section class="wish-group mine">
+          <h3>Sua lista <span id="wishMineCount" class="tool-count"></span></h3>
+          <ul id="wishMine" class="wish-list"></ul>
+        </section>
+        <div id="wishOthers"></div>
+      </div>
+      <p class="drawer-foot">Sua lista fica salva neste navegador e aparece para todos da sala.</p>
+    </div>
+
+    <div id="ammoPanel" class="drawer wide-drawer" role="dialog" aria-label="Tabela de munição" hidden>
+      <div class="drawer-head">
+        <h2>Munição</h2>
+        <button id="ammoClose" type="button" class="icon" title="Fechar (Esc)" aria-label="Fechar"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d='M18 6 6 18M6 6l12 12'/></svg></button>
+      </div>
+      <div class="tabs" role="tablist">
+        <button type="button" class="tab on" role="tab" aria-selected="true">Escape from Tarkov</button>
+      </div>
+      <div class="search-opts">
+        <select id="ammoCaliber" aria-label="Calibre"></select>
+        <span id="ammoStatus" class="item-status"></span>
+      </div>
+      <div class="ammo-head">
+        <span>Munição</span><span>Dano</span><span>Pen.</span><span>Blind.</span><span>Classes 1–6</span><span>Mercado</span><span></span>
+      </div>
+      <ul id="ammoRows" class="results ammo-rows"></ul>
+      <p class="drawer-foot">Classes: <span class="ammo-class good">✓</span> fura bem · <span class="ammo-class some">~</span> às vezes · <span class="ammo-class none">×</span> não fura (aproximação pela penetração) · dados da tarkov.dev</p>
     </div>
 
     <div class="layout">
@@ -210,6 +270,11 @@
             <button type="submit" class="primary">Salvar</button>
           </form>
           <p id="jamStatus" class="jam-status">No Spotify, inicie uma Jam e use <strong>Compartilhar</strong> para copiar o link.</p>
+          <!-- O Spotify não tem link que já crie uma Jam: ela é iniciada dentro do app. -->
+          <p class="jam-foot">
+            <a href="spotify:" title="Abre o app do Spotify instalado no computador">Abrir o Spotify</a> ·
+            <a href="https://support.spotify.com/br-pt/article/jam/" target="_blank" rel="noopener noreferrer" title="Passo a passo oficial do Spotify">Como criar uma Jam</a>
+          </p>
         </details>
       </aside>
       <section id="grid">
@@ -260,5 +325,7 @@
   <script type="module" src="tasks.js"></script>
   <script type="module" src="maps.js"></script>
   <script type="module" src="palette.js"></script>
+  <script type="module" src="ammo.js"></script>
+  <script type="module" src="tarkov-time.js"></script>
 </body>
 </html>

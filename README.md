@@ -49,9 +49,35 @@ O botão **Abrir PiP** abre uma janela pequena que fica por cima de todos os pro
 
 ## Spotify Jams
 
-Na lateral, embaixo de **Na sala**, a seção **Spotify Jams** (abre e fecha) mostra as Jams do Spotify de quem está na sala. Para cadastrar a sua: no Spotify, inicie uma Jam, toque em **Compartilhar**, copie o link e cole no campo. Pode colar a mensagem inteira que o Spotify gera; o site acha o link. Cada Jam tem os botões **Entrar** (abre o link, que leva ao app do Spotify) e **Copiar**, e a sua tem **Remover**. A Jam de alguém some da lista quando a pessoa sai da sala.
+Na lateral, embaixo de **Na sala**, a seção **Spotify Jams** (abre e fecha) mostra as Jams do Spotify de quem está na sala. Para cadastrar a sua: no Spotify, inicie uma Jam, toque em **Compartilhar**, copie o link e cole no campo. Pode colar a mensagem inteira que o Spotify gera; o site acha o link. Cada Jam tem os botões **Entrar** (abre o link, que leva ao app do Spotify) e **Copiar**, e a sua tem **Remover**. No rodapé da seção ficam **Abrir o Spotify** (abre o app instalado) e **Como criar uma Jam** (passo a passo oficial); o Spotify não tem um link que já crie a Jam, ela é iniciada dentro do app. A Jam de alguém some da lista quando a pessoa sai da sala.
 
 Por segurança, só são aceitos links `https` de `spotify.link` (o link curto do Compartilhar) ou `open.spotify.com/socialsession/…`, com o domínio exatamente igual. O link é validado de novo quando chega de outro PC e remontado só com o código, então endereços parecidos (ex.: `spotify.link.golpe.com`), `http`, links com usuário/porta ou qualquer outra coisa são recusados.
+
+## Ferramentas do Tarkov (grupo na barra)
+
+O grupo **Tarkov** da barra reúne a busca rápida, Itens, Players, Tasks, Mapas, Munição e Wishlist. Em telas mais estreitas, os botões ficam só com o ícone (o nome aparece ao passar o mouse).
+
+### Hora do Tarkov
+No começo do grupo ficam os **dois horários de raid** do jogo (☀ dia / ☾ noite), que andam 7× mais rápido que o relógio real. É a mesma conta do tarkov.dev. Factory e The Lab têm horário fixo e não seguem esse relógio.
+
+### Wishlist do squad
+Cada um lista os itens que precisa (quests, hideout) e todos da sala veem, para pegar para o amigo na raid. Dá para adicionar:
+- no próprio painel **Wishlist** (busque o item; marque **Precisa ser FIR** se for o caso);
+- com **+ Wishlist** nos cartões de **Itens**;
+- com **+** ao lado dos itens necessários de uma tarefa em **Tasks** (já vem com a quantidade e o FIR da tarefa);
+- com **+** na tabela de **Munição**.
+
+Adicionar de novo o mesmo item soma a quantidade; use **− / +** e **×** para ajustar. A sua lista fica salva neste navegador; a dos outros aparece enquanto eles estão na sala ("Ana precisa: …"). O número no botão mostra quantos itens há no total. Por segurança, as listas que chegam dos outros PCs são validadas (até 60 itens, nome até 80 caracteres, quantidade até 999).
+
+### Munição
+Escolha o calibre e veja cada munição com **dano, penetração, dano na blindagem e preço** (menor oferta no mercado ou, sem oferta, a média de 24 h), ordenadas pela penetração. As classes de blindagem 1–6 aparecem em verde (fura bem), laranja (às vezes) ou cinza (não fura). É uma aproximação pela penetração: fura bem quando a penetração passa de classe × 10. Usa a mesma lista e o mesmo modo (Season/PvP/PvE) do painel de Itens.
+
+### Chefes e Goons nos mapas
+No painel **Mapas**, embaixo da lista de mapas, aparecem os **chefes daquele mapa com a chance de spawn** e **onde os Goons foram vistos por último** (relatos da comunidade no tarkov.dev), com o seletor **Season / PvP / PvE**.
+
+## Instalar como app
+
+No Chrome ou Edge, o site pode ser instalado como app: janela própria, sem barra do navegador e com ícone na barra de tarefas. Use o ícone de instalar na barra de endereço ou **Instalar app** (no rodapé da entrada ou nos Ajustes, quando o navegador permitir). O app sempre busca a versão nova do site primeiro; a cópia guardada só é usada sem internet.
 
 ## Busca rápida (Ctrl+K)
 
@@ -168,5 +194,9 @@ Algumas opções são o Metered.ca (tem plano grátis), o Cloudflare Calls TURN 
 - `maps.js` e `maps/`: mapas com as extrações.
 - `palette.js`: busca rápida (Ctrl+K).
 - `jams.js`: Spotify Jams da sala (com o validador de links).
+- `wishlist.js`: wishlist do squad.
+- `ammo.js`: tabela de munição.
+- `tarkov-time.js`: hora do Tarkov.
+- `manifest.webmanifest`, `sw.js`, `icon-*.png`: instalar como app (PWA).
 - `icons.js` e `logo.svg`: ícones e logo.
 - `vendor/trystero.js`: Trystero 0.26.0 (estratégia Nostr) empacotado num arquivo só, licença MIT.

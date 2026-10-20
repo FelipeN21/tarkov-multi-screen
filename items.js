@@ -5,6 +5,7 @@
 // baixada de novo depois de alguns minutos.
 
 import { MODES, fold, safeUrl, searchText, getJSON, getOnce, openDrawer, closeDrawer, showSkeleton, clearSkeleton } from './tarkov-data.js';
+import { addToWishlist } from './wishlist.js';
 
 const MAX_RESULTS = 30;
 const REFRESH_MS = 10 * 60 * 1000;
@@ -71,7 +72,9 @@ async function loadList(m) {
     const name = en[i.name] || i.normalizedName;
     const short = en[i.shortName] || '';
     const namePt = pt[i.name] || '';
+    const p = i.properties;
     return {
+      id: i.id,
       name,
       short,
       namePt: namePt !== name ? namePt : '',
@@ -84,6 +87,11 @@ async function loadList(m) {
       avg: i.avg24hPrice || 0,
       change: i.changeLast48hPercent || 0,
       trader: best && { name: traderName(best.trader), price: best.price },
+      // Só para munição (tabela de munição).
+      // (armas também têm "calibre" nos dados; por isso o filtro pelo tipo de item)
+      ammo: p?.propertiesType === 'ItemPropertiesAmmo' && p.caliber && p.ammoType !== 'grenade'
+        ? { caliber: p.caliber, damage: p.damage || 0, pen: p.penetrationPower || 0, armorDmg: p.armorDamage || 0, projectiles: p.projectileCount || 1, tracer: !!p.tracer }
+        : undefined,
     };
   });
   return { time: Date.now(), items, updated };
@@ -151,6 +159,11 @@ export function openItems(raw) {
   search();
 }
 export const formatPrice = rub;
+export const getItemMode = () => mode;
+export async function getAmmo() {
+  const list = await ensureList();
+  return list.items.filter((i) => i.ammo);
+}
 
 async function search() {
   const raw = $('#itemQuery').value.trim().replace(/\s+/g, ' ');
@@ -239,6 +252,12 @@ function renderItem(item) {
   const slots = item.w * item.h;
   if (best && slots > 1) row('Por slot', rub(Math.round(best / slots)));
 
-  li.append(icon, info, prices);
+  const wish = document.createElement('button');
+  wish.type = 'button';
+  wish.className = 'wish-add';
+  wish.textContent = '+ Wishlist';
+  wish.title = 'Adicionar à sua wishlist';
+  wish.addEventListener('click', () => status(addToWishlist({ id: item.id, name: item.name, count: 1 }), 'ok'));
+  li.append(icon, info, prices, wish);
   return li;
 }

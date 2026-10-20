@@ -2,7 +2,7 @@
 // abaixo), baixadas do tarkov.dev e guardadas na pasta maps/ do site. Para atualizar um mapa,
 // troque o arquivo em maps/ (veja o README).
 
-import { fold, openDrawer, closeDrawer } from './tarkov-data.js';
+import { MODES, fold, getJSON, getOnce, openDrawer, closeDrawer } from './tarkov-data.js';
 
 const MAPS = [
   { key: 'customs', name: 'Customs', author: 'monkimonkimonk', link: 'https://www.reddit.com/user/monkimonkimonk/' },
@@ -60,6 +60,7 @@ $('#mapList').replaceChildren(
 
 function show(map) {
   current = map;
+  renderBosses();
   try { localStorage.setItem('tela:map', map.key); } catch {}
   for (const b of $('#mapList').children) b.classList.toggle('on', b.dataset.key === map.key);
   const credit = $('#mapCredit');
@@ -82,6 +83,98 @@ function show(map) {
   $('#mapLoading').hidden = false;
   img.hidden = true;
   img.src = src;
+}
+
+// ---------- chefes e Goons (dados da tarkov.dev, por modo) ----------
+// Nome do mapa nos dados da tarkov.dev, para cada imagem daqui.
+const DATA_KEY = {
+  customs: 'customs', factory: 'factory', 'ground-zero': 'ground-zero', interchange: 'interchange', labs: 'the-lab',
+  labyrinth: 'the-labyrinth', lighthouse: 'lighthouse', reserve: 'reserve', shoreline: 'shoreline',
+  streets: 'streets-of-tarkov', terminal: 'terminal', woods: 'woods', icebreaker: 'icebreaker',
+};
+const mapData = {}; // modo -> Promise<{ maps, mobs, goons, names }>
+let infoMode = 'pvp-season';
+try {
+  const saved = localStorage.getItem('tela:mapGameMode');
+  if (MODES[saved]) infoMode = saved;
+} catch {}
+
+function loadMapData(m) {
+  mapData[m] ??= Promise.all([getJSON(`${m}/maps`), getOnce('regular/maps_en')]).then(([d, names]) => ({
+    maps: Object.values(d.maps),
+    mobs: d.mobs || {},
+    goons: [...(d.goonReports || [])].sort((a, b) => b.timestamp - a.timestamp),
+    names,
+  })).catch((err) => {
+    delete mapData[m];
+    throw err;
+  });
+  return mapData[m];
+}
+
+function ago(ms) {
+  const min = Math.round((Date.now() - ms) / 60000);
+  if (min < 60) return `há ${Math.max(1, min)} min`;
+  const h = Math.round(min / 60);
+  return h < 48 ? `há ${h} h` : `há ${Math.round(h / 24)} dias`;
+}
+
+async function renderBosses() {
+  for (const b of document.querySelectorAll('#mapMode button')) b.classList.toggle('on', b.dataset.mode === infoMode);
+  const box = $('#mapBosses');
+  const key = current && DATA_KEY[current.key];
+  if (!key) {
+    box.replaceChildren();
+    return;
+  }
+  const wanted = current;
+  box.textContent = 'Carregando chefes…';
+  let data;
+  try {
+    data = await loadMapData(infoMode);
+  } catch {
+    box.textContent = 'Não foi possível baixar os chefes da tarkov.dev.';
+    return;
+  }
+  if (current !== wanted) return; // trocou de mapa no meio
+  const map = data.maps.find((m) => m.normalizedName === key);
+  // Um chefe pode aparecer em mais de um ponto: fica a maior chance.
+  const bosses = new Map();
+  for (const b of map?.bosses || []) {
+    const mob = data.mobs[b.mob];
+    if (['bear', 'usec'].includes(mob?.normalizedName)) continue; // bots de PMC, não são chefes
+    const name = data.names[mob?.name] || mob?.normalizedName || b.mob;
+    bosses.set(name, Math.max(bosses.get(name) || 0, b.spawnChance || 0));
+  }
+  const chips = [...bosses].sort((a, b) => b[1] - a[1]).map(([name, chance]) => {
+    const c = document.createElement('span');
+    c.className = 'boss';
+    c.textContent = `${name} ${Math.round(chance * 100)}%`;
+    return c;
+  });
+  const label = document.createElement('span');
+  label.className = 'map-info-label';
+  label.textContent = 'Chefes';
+  const goon = data.goons[0];
+  const goonText = document.createElement('span');
+  goonText.className = 'goons';
+  if (goon) {
+    const where = data.maps.find((m) => m.id === goon.map);
+    const here = where?.normalizedName === key;
+    goonText.textContent = `Goons vistos por último ${here ? 'neste mapa' : `em ${data.names[where?.name] || 'outro mapa'}`} ${ago(+goon.timestamp)}`;
+    goonText.classList.toggle('here', here);
+  } else {
+    goonText.textContent = 'Sem relatos recentes dos Goons';
+  }
+  box.replaceChildren(label, ...(chips.length ? chips : [document.createTextNode('Nenhum chefe neste mapa')]), goonText);
+}
+
+for (const b of document.querySelectorAll('#mapMode button')) {
+  b.addEventListener('click', () => {
+    infoMode = b.dataset.mode;
+    try { localStorage.setItem('tela:mapGameMode', infoMode); } catch {}
+    renderBosses();
+  });
 }
 
 // Para a busca rápida (Ctrl+K).

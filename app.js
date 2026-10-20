@@ -5,6 +5,7 @@ import { joinRoom, selfId } from './vendor/trystero.js';
 import { pipSupported, connectPip, openPip, closePip, isPipOpen, refreshPip } from './pip.js';
 import { icon } from './icons.js';
 import { connectJams, renderJams, canonicalJam } from './jams.js';
+import { connectWishlist, receiveWishlist, dropWishlist, sendMyWishlist, renderWishlist } from './wishlist.js';
 
 const APP_ID = 'tela-compartilhar-tela-v1';
 // Aparece no rodapé, nos ajustes e no "Sobre": ajuda a saber se o navegador está com a versão nova.
@@ -34,6 +35,7 @@ const QUALITY = {
 let room;
 let stateAction;
 let sigAction;
+let wishAction;
 const myId = selfId;
 let myName;
 const rtcConfig = RTC_CONFIG;
@@ -129,11 +131,22 @@ $('#join').addEventListener('submit', async (e) => {
   sigAction = room.makeAction('sig');
   stateAction.onMessage = (data, { peerId }) => enqueue(() => onState(peerId, data));
   sigAction.onMessage = (data, { peerId }) => enqueue(() => onSignal(peerId, data));
-  room.onPeerJoin = (peerId) => sendState(peerId);
+  // Wishlist em um canal próprio (a lista pode ter dezenas de itens).
+  wishAction = room.makeAction('wish');
+  wishAction.onMessage = (data, { peerId }) => receiveWishlist(peerId, data);
+  room.onPeerJoin = (peerId) => {
+    sendState(peerId);
+    sendMyWishlist(peerId);
+  };
   room.onPeerLeave = (peerId) => enqueue(() => onPeerLeave(peerId));
   addEventListener('pagehide', () => room.leave());
 
   people.set(myId, { name: myName, sharing: false, jam: null });
+  connectWishlist({
+    send: (list, target = null) => wishAction.send(list, { target }).catch(() => {}),
+    people: () => people,
+    myId,
+  });
   connectJams({
     people: () => people,
     myId,
@@ -188,6 +201,7 @@ async function onState(peerId, data) {
 
 function onPeerLeave(peerId) {
   people.delete(peerId);
+  dropWishlist(peerId);
   closeSend(peerId);
   closeRecv(peerId);
   renderPeople();
@@ -751,6 +765,7 @@ function renderPeople() {
     ul.append(li);
   }
   renderJams();
+  renderWishlist(); // os nomes nas listas dos outros vêm daqui
 }
 
 // Tema claro/escuro. O escuro é o padrão; o <head> do index.html já aplica o tema salvo.
@@ -778,6 +793,28 @@ $('#copy').addEventListener('click', async () => {
     prompt('Copie o link:', location.href);
   }
 });
+
+// Instalar como app (PWA). O navegador avisa quando dá para instalar; aí os botões aparecem.
+if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(() => {});
+let installPrompt = null;
+addEventListener('beforeinstallprompt', (e) => {
+  e.preventDefault();
+  installPrompt = e;
+  for (const b of document.querySelectorAll('.install-app')) b.hidden = false;
+});
+addEventListener('appinstalled', () => {
+  installPrompt = null;
+  for (const b of document.querySelectorAll('.install-app')) b.hidden = true;
+});
+for (const b of document.querySelectorAll('.install-app')) {
+  b.addEventListener('click', async () => {
+    if (!installPrompt) return;
+    installPrompt.prompt();
+    await installPrompt.userChoice.catch(() => {});
+    installPrompt = null;
+    for (const x of document.querySelectorAll('.install-app')) x.hidden = true;
+  });
+}
 
 // Versão e janela "Sobre"
 for (const el of document.querySelectorAll('.app-version')) el.textContent = APP_VERSION;
