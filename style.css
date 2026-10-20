@@ -697,6 +697,9 @@ a.item-name:hover { color: var(--accent); }
 .wish-add { padding: 3px 10px; border-radius: 999px; font-size: 12px; font-weight: 600; color: var(--accent); }
 .item .wish-add { grid-column: 2; justify-self: start; margin-top: 4px; }
 .wish-add.small { margin-left: auto; padding: 0; width: 24px; height: 24px; font-size: 15px; line-height: 1; }
+.wish-all { align-self: flex-start; padding: 5px 14px; background: rgba(10, 132, 255, .14); }
+.wish-all:hover { background: rgba(10, 132, 255, .24); }
+.wish-all:disabled { opacity: 1; background: rgba(48, 209, 88, .16); color: var(--ok); }
 
 /* Wishlist do squad */
 .check-inline { display: inline-flex; align-items: center; gap: 6px; flex-shrink: 0; color: var(--text); font-size: 12.5px; cursor: pointer; }

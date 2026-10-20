@@ -290,6 +290,21 @@ function renderTask(t) {
       ul.append(row);
     }
     li.append(ul);
+
+    // Todos os itens da tarefa de uma vez (os que dá para achar na raid; itens de missão ficam de fora).
+    const wishable = t.items.filter((it) => it.id);
+    if (wishable.length) {
+      const all = el('button', 'wish-add wish-all', `+ Adicionar ${wishable.length === 1 ? 'o item' : `os ${wishable.length} itens`} à wishlist`);
+      all.type = 'button';
+      all.title = 'Coloca na sua wishlist todos os itens necessários desta tarefa, com a quantidade e o FIR';
+      all.addEventListener('click', () => {
+        for (const it of wishable) addToWishlist({ id: it.id, name: it.name, count: it.count, fir: it.fir });
+        all.disabled = true; // evita somar duas vezes sem querer
+        all.textContent = '✓ Na sua wishlist';
+        status(`${wishable.length === 1 ? 'Item' : `${wishable.length} itens`} de “${t.name}” na sua wishlist.`, 'ok');
+      });
+      li.append(all);
+    }
   }
 
   if (t.wiki) {

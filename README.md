@@ -69,7 +69,7 @@ O grupo **Tarkov** da barra reúne a busca rápida, Itens, Players, Tasks, Mapas
 Cada um lista os itens que precisa (quests, hideout) e todos da sala veem, para pegar para o amigo na raid. Dá para adicionar:
 - no próprio painel **Wishlist** (busque o item; marque **Precisa ser FIR** se for o caso);
 - com **+ Wishlist** nos cartões de **Itens**;
-- com **+** ao lado dos itens necessários de uma tarefa em **Tasks** (já vem com a quantidade e o FIR da tarefa);
+- em **Tasks**, com **+ Adicionar os itens à wishlist** embaixo dos itens necessários (todos de uma vez, com a quantidade e o FIR da tarefa), ou com **+** ao lado de um item;
 - com **+** na tabela de **Munição**.
 
 Adicionar de novo o mesmo item soma a quantidade; use **− / +** e **×** para ajustar. A sua lista fica salva neste navegador; a dos outros aparece enquanto eles estão na sala ("Ana precisa: …"). O número no botão mostra quantos itens há no total. Por segurança, as listas que chegam dos outros PCs são validadas (até 60 itens, nome até 80 caracteres, quantidade até 999).
