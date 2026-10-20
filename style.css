@@ -272,10 +272,14 @@ body:has(#app:not([hidden])) .join-footer { display: none; }
 .toolgroup-label { padding: 0 6px 0 8px; color: var(--muted); font-size: 11px; font-weight: 600; letter-spacing: .04em; text-transform: uppercase; }
 /* "Tarkov" é um botão: recolhe/mostra as ferramentas (a setinha indica o estado). */
 .bar button.toolgroup-label { gap: 4px; height: 30px; padding: 0 8px 0 10px; border-radius: 9px; background: none; }
-.bar button.toolgroup-label:hover { background: var(--fill); color: var(--text); }
+.bar button.toolgroup-label:hover { background: var(--fill); }
 .bar button.toolgroup-label::before { content: none; }
-.bar button.toolgroup-label::after { content: "‹"; margin-top: -2px; font-size: 16px; line-height: 1; letter-spacing: 0; }
-.toolgroup.collapsed button.toolgroup-label::after { content: "›"; }
+/* Aberto: branco aceso e brilhante. Recolhido: cinza apagado. (No tema claro, o "aceso" é preto.) */
+.bar button.toolgroup-label { color: #fff; text-shadow: 0 0 6px rgba(255, 255, 255, .75), 0 0 14px rgba(255, 255, 255, .35); transition: color .2s, text-shadow .2s, opacity .2s; }
+:root[data-theme="light"] .bar button.toolgroup-label { color: #1d1d1f; text-shadow: none; }
+.bar .toolgroup.collapsed button.toolgroup-label { color: var(--muted-2); text-shadow: none; opacity: .6; }
+.bar .toolgroup.collapsed button.toolgroup-label:hover { opacity: .9; }
+.toolgroup.collapsed { background: none; } /* recolhido: sem a cápsula em volta, só o nome apagado */
 .toolgroup-items { display: inline-flex; align-items: center; gap: 2px; }
 .toolgroup.collapsed .toolgroup-items { display: none; }
 .toolgroup button { padding: 5px 11px; border-radius: 9px; }
