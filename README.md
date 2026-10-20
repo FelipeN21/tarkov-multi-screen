@@ -44,9 +44,15 @@ O botão **Abrir PiP** abre uma janela pequena que fica por cima de todos os pro
 
 - **Dados de outros PCs** (nomes, Jams, wishlist) aparecem sempre como texto, nunca como HTML. Antes disso, nomes e itens são limpos: sem `<` `>`, sem caracteres de controle e sem caracteres invisíveis ou de inversão de direção (usados para disfarçar nomes). Links de Jam são validados e remontados (veja *Spotify Jams*).
 - **Limite contra spam:** cada pessoa pode mandar no máximo uma atualização por segundo de estado (nome, transmissão, Jam) e de wishlist. Se mandar mais, vale só a última. Mensagens com formato errado são descartadas.
-- **Política de segurança (CSP)** no `index.html`: o navegador só roda scripts do próprio site e só carrega dados da tarkov.dev, ícones de `assets.tarkov.dev` e as conexões dos relays (`wss:`). Mesmo que um erro futuro deixasse passar HTML de alguém, um script injetado não rodaria.
+- **Política de segurança (CSP)** no `index.html`: o navegador só roda scripts do próprio site e só carrega dados da tarkov.dev, ícones de `assets.tarkov.dev` e as conexões com os relays da lista abaixo. Mesmo que um erro futuro deixasse passar HTML de alguém, um script injetado não rodaria.
   - O pequeno script do tema dentro do `<head>` é autorizado pela "impressão digital" (hash `sha256`) dele, que está na CSP. **Se mudar qualquer caractere desse script, o hash precisa ser recalculado**, senão o tema salvo deixa de ser aplicado ao abrir a página (o navegador mostra o hash certo no console).
   - Se um dia usar outro serviço (por exemplo, uma API nova), o endereço dele precisa entrar na CSP.
+
+### Relays
+
+As pessoas da sala se encontram por relays Nostr públicos (só para a "apresentação"; vídeo, nomes e listas vão direto entre os PCs). O site usa uma lista fixa de relays conhecidos e testados: `nostr-pub.wellorder.net`, `nos.lol`, `relay.nostr.net`, `nostr.mom`, `relay.primal.net`, `nostr.oxtr.dev`, `relay.snort.social`. Todos precisam estar na mesma versão do site: quem estiver com outra lista de relays não encontra os demais (peça Ctrl+F5 depois de publicar). Para mudar a lista, altere `RELAYS` no `app.js` **e** o `connect-src` da CSP no `index.html`.
+
+A senha ignora espaços no começo e no fim (maiúsculas e minúsculas continuam diferentes).
 
 ## Publicar no GitHub Pages
 

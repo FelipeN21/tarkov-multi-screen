@@ -10,11 +10,24 @@ import { cleanText } from './sanitize.js';
 
 const APP_ID = 'tela-compartilhar-tela-v1';
 // Aparece no rodapé, nos ajustes e no "Sobre": ajuda a saber se o navegador está com a versão nova.
-export const APP_VERSION = '2026.10.20';
+export const APP_VERSION = '2026.10.20.2';
 
 // STUN descobre o IP público. Se algum amigo não conseguir conectar (4G, rede de faculdade…),
 // adicione um servidor TURN aqui, por exemplo:
 // { urls: 'turn:servidor:3478', username: 'usuario', credential: 'senha' }
+// Relays Nostr onde as pessoas da sala se encontram: só relays conhecidos e testados (todos
+// precisam usar a mesma lista; quem estiver com outra lista não encontra os demais). Se mudar esta
+// lista, atualize também o connect-src da CSP no index.html.
+const RELAYS = [
+  'wss://nostr-pub.wellorder.net',
+  'wss://nos.lol',
+  'wss://relay.nostr.net',
+  'wss://nostr.mom',
+  'wss://relay.primal.net',
+  'wss://nostr.oxtr.dev',
+  'wss://relay.snort.social',
+];
+
 const RTC_CONFIG = {
   iceServers: [{ urls: ['stun:stun.l.google.com:19302', 'stun:stun1.l.google.com:19302'] }],
   bundlePolicy: 'max-bundle',
@@ -109,7 +122,7 @@ $('#join').addEventListener('submit', async (e) => {
   myName = cleanText($('#name').value, 32) || 'Anônimo';
   const roomName = roomKey($('#room').value);
   if (!roomName) return;
-  const secret = $('#password').value;
+  const secret = $('#password').value.trim(); // espaço sem querer no começo/fim não muda a senha
   save('name', myName);
   save('pw:' + roomName, secret);
   history.replaceState(null, '', '#' + encodeURIComponent(roomName));
@@ -120,7 +133,7 @@ $('#join').addEventListener('submit', async (e) => {
   joinBtn.disabled = true;
   joinBtn.textContent = 'Entrando…';
   const password = secret ? await stretchPassword(secret, roomName) : roomName;
-  room = joinRoom({ appId: APP_ID, password, rtcConfig }, roomName, {
+  room = joinRoom({ appId: APP_ID, password, rtcConfig, relayConfig: { urls: RELAYS } }, roomName, {
     onJoinError: (err) => {
       // Os dois lados recebem esse erro: quem errou a senha e quem já estava na sala.
       if (/password/i.test(err.error)) {
