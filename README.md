@@ -57,6 +57,25 @@ O botão **🔎 Itens** abre um painel para consultar o preço de um item sem sa
 
 Os dados vêm dos arquivos públicos da [tarkov.dev](https://tarkov.dev), os mesmos que o site deles usa. A API GraphQL da tarkov.dev estava fora do ar quando isto foi feito. A lista (~2 MB) é baixada uma vez quando você abre o painel, e a busca roda no seu navegador: digitar e buscar não fazem novas requisições, e a lista só é baixada de novo depois de 10 minutos. Esses arquivos não têm documentação oficial; se mudarem, o painel avisa que não conseguiu baixar os preços.
 
+## Perfil de jogadores (Escape from Tarkov)
+
+O botão **👤 Players** abre um painel para ver o perfil de um jogador: digite o **nome exato** (maiúsculas não importam), escolha **Season / PvP / PvE** e aperte **Enter**. O perfil abre no [tarkov.dev](https://tarkov.dev/players) numa aba nova, com nível, facção, estatísticas de PMC, conquistas e equipamento. Os últimos nomes buscados ficam salvos no painel para abrir de novo com um clique.
+
+Não existe API pública de perfis: a do tarkov.dev exige um captcha que só funciona no site deles. Por isso o perfil abre lá, e não dentro deste site.
+
+## Tarefas (Escape from Tarkov)
+
+O botão **📋 Tasks** busca uma tarefa pelo nome (inglês ou português), pelo trader (`prapor`) ou pelo mapa. Cada cartão mostra só o essencial:
+
+- trader, mapa, nível mínimo e se é necessária para **Kappa** ou **Lightkeeper**;
+- **Objectives**: os objetivos;
+- **Required items**: o que entregar ou plantar, com quantidade e a marca **FIR** quando precisa ser encontrado em incursão, além de itens da missão e chaves;
+- **Open wiki**: link para a página completa da tarefa.
+
+Os cartões ficam em inglês, como no jogo e na wiki. A busca aceita o nome em inglês ou português.
+
+Também tem **Season / PvP / PvE** (o Season é o padrão). Os dados vêm dos mesmos arquivos públicos da tarkov.dev usados na busca de itens.
+
 ## Áudio
 
 - **Áudio**: o que vai junto depende do que você escolhe na hora de compartilhar.
@@ -120,4 +139,7 @@ Algumas opções são o Metered.ca (tem plano grátis), o Cloudflare Calls TURN 
 - `app.js`: captura da tela, conexões WebRTC e ajustes de latência.
 - `pip.js`: janela PiP com layouts e recortes.
 - `items.js`: busca de preços de itens do Escape from Tarkov.
+- `players.js`: atalho para o perfil de jogadores no tarkov.dev.
+- `tasks.js`: busca de tarefas (o que fazer e itens necessários).
+- `tarkov-data.js`: partes comuns dos painéis do Escape from Tarkov.
 - `vendor/trystero.js`: Trystero 0.26.0 (estratégia Nostr) empacotado num arquivo só, licença MIT.

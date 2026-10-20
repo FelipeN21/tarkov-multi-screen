@@ -77,7 +77,9 @@
         </div>
       </details>
 
-      <button id="itemsBtn" type="button" class="ghost" title="Buscar preços de itens">🔎 Itens</button>
+      <button id="itemsBtn" type="button" class="ghost drawer-btn" title="Buscar preços de itens">🔎 Itens</button>
+      <button id="playersBtn" type="button" class="ghost drawer-btn" title="Abrir o perfil de um jogador">👤 Players</button>
+      <button id="tasksBtn" type="button" class="ghost drawer-btn" title="O que fazer em cada tarefa e os itens necessários">📋 Tasks</button>
       <button id="pip" type="button" class="ghost" title="Abre uma janela por cima dos outros programas com as telas dos amigos. Abra antes de entrar no jogo (o jogo precisa estar em modo sem bordas/Borderless).">Abrir PiP</button>
       <button id="share" class="primary" type="button">Compartilhar tela</button>
     </header>
@@ -106,6 +108,58 @@
       <p class="drawer-foot">Preços da <a href="https://tarkov.dev" target="_blank" rel="noopener noreferrer">tarkov.dev</a> · atualizados a cada poucos minutos</p>
     </div>
 
+    <div id="playersPanel" class="drawer" role="dialog" aria-label="Busca de jogadores" hidden>
+      <div class="drawer-head">
+        <h2>Busca de jogadores</h2>
+        <button id="playersClose" type="button" class="icon" title="Fechar (Esc)">✕</button>
+      </div>
+      <div class="tabs" role="tablist">
+        <button type="button" class="tab on" role="tab" aria-selected="true">Escape from Tarkov</button>
+      </div>
+      <form id="playerSearch" class="search">
+        <input id="playerName" maxlength="24" placeholder="Nome exato do jogador" autocomplete="off" spellcheck="false">
+        <button class="primary" type="submit">Abrir perfil</button>
+      </form>
+      <div class="search-opts">
+        <div id="playerMode" class="seg" title="Cada modo tem um perfil próprio">
+          <button type="button" data-mode="pvp-season">Season</button>
+          <button type="button" data-mode="regular">PvP</button>
+          <button type="button" data-mode="pve">PvE</button>
+        </div>
+        <span id="playerStatus" class="item-status">Digite o nome e aperte Enter.</span>
+      </div>
+      <div id="playerRecentBox" class="recent" hidden>
+        <h3>Buscados recentemente</h3>
+        <ul id="playerRecent"></ul>
+      </div>
+      <p class="player-note">O perfil abre no tarkov.dev, numa aba nova: nível, facção, estatísticas de PMC, conquistas e equipamento. O nome precisa ser exato (maiúsculas não importam). O tarkov.dev pode fazer uma verificação rápida antes de mostrar o perfil.</p>
+      <p class="drawer-foot">Perfis do <a href="https://tarkov.dev/players" target="_blank" rel="noopener noreferrer">tarkov.dev</a></p>
+    </div>
+
+    <div id="tasksPanel" class="drawer" role="dialog" aria-label="Busca de tarefas" hidden>
+      <div class="drawer-head">
+        <h2>Busca de tarefas</h2>
+        <button id="tasksClose" type="button" class="icon" title="Fechar (Esc)">✕</button>
+      </div>
+      <div class="tabs" role="tablist">
+        <button type="button" class="tab on" role="tab" aria-selected="true">Escape from Tarkov</button>
+      </div>
+      <form id="taskSearch" class="search">
+        <input id="taskQuery" maxlength="60" placeholder="Tarefa ou trader (ex.: shortage, prapor)" autocomplete="off" spellcheck="false">
+        <button class="primary" type="submit">Buscar</button>
+      </form>
+      <div class="search-opts">
+        <div id="taskMode" class="seg" title="Cada modo tem tarefas próprias">
+          <button type="button" data-mode="pvp-season">Season</button>
+          <button type="button" data-mode="regular">PvP</button>
+          <button type="button" data-mode="pve">PvE</button>
+        </div>
+        <span id="taskStatus" class="item-status">Digite parte do nome e aperte Enter.</span>
+      </div>
+      <ul id="taskResults" class="results"></ul>
+      <p class="drawer-foot">Tarefas da <a href="https://tarkov.dev/tasks" target="_blank" rel="noopener noreferrer">tarkov.dev</a> · detalhes completos na wiki</p>
+    </div>
+
     <div class="layout">
       <aside>
         <h2>Na sala</h2>
@@ -120,5 +174,7 @@
   <div id="banner" hidden></div>
   <script type="module" src="app.js"></script>
   <script type="module" src="items.js"></script>
+  <script type="module" src="players.js"></script>
+  <script type="module" src="tasks.js"></script>
 </body>
 </html>

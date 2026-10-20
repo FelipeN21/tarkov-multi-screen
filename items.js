@@ -4,19 +4,16 @@
 // (~2 MB) e a busca roda no navegador: digitar não faz nenhuma requisição, e a lista só é
 // baixada de novo depois de alguns minutos.
 
-const BASE = 'https://json.tarkov.dev';
+import { MODES, fold, safeUrl, searchText, getJSON, getOnce, openDrawer, closeDrawer } from './tarkov-data.js';
+
 const MAX_RESULTS = 30;
 const REFRESH_MS = 10 * 60 * 1000;
 
 const $ = (s) => document.querySelector(s);
 const lists = {}; // modo -> { time, items, updated } (ou uma Promise enquanto carrega)
-// Modos de jogo da tarkov.dev (cada um com preços próprios). O Season é o padrão.
-const MODES = { 'pvp-season': 'Season', regular: 'PvP', pve: 'PvE' };
 let mode = 'pvp-season';
 
 const rub = (n) => new Intl.NumberFormat('pt-BR').format(n) + ' ₽';
-const fold = (s) => (s || '').normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase();
-const safeUrl = (u) => (typeof u === 'string' && u.startsWith('https://') ? u : null);
 
 try {
   const saved = localStorage.getItem('tela:itemGameMode');
@@ -25,15 +22,11 @@ try {
 
 // ---------- abrir / fechar o painel ----------
 function openPanel() {
-  $('#itemsPanel').hidden = false;
-  $('#itemsBtn').classList.add('on');
+  openDrawer($('#itemsPanel'), $('#itemsBtn'));
   $('#itemQuery').focus();
   ensureList().catch(() => {}); // já vai baixando enquanto a pessoa digita
 }
-function closePanel() {
-  $('#itemsPanel').hidden = true;
-  $('#itemsBtn').classList.remove('on');
-}
+const closePanel = () => closeDrawer($('#itemsPanel'), $('#itemsBtn'));
 
 $('#itemsBtn').addEventListener('click', () => ($('#itemsPanel').hidden ? openPanel() : closePanel()));
 $('#itemsClose').addEventListener('click', closePanel);
@@ -62,32 +55,11 @@ function status(text, kind = '') {
 }
 
 // ---------- baixar a lista ----------
-async function getJSON(path) {
-  // no-cache: o servidor manda guardar por 8 dias; assim o navegador sempre confere se mudou.
-  const res = await fetch(`${BASE}/${path}`, { cache: 'no-cache', signal: AbortSignal.timeout(30_000) });
-  if (!res.ok) throw new Error(`${path}: HTTP ${res.status}`);
-  return (await res.json()).data;
-}
-
-// Os nomes são iguais em todos os modos: baixa uma vez só.
-let names = null;
-function loadNames() {
-  names ??= Promise.all([
-    getJSON('regular/items_en'),
-    getJSON('regular/items_pt').catch(() => ({})),
-    getJSON('regular/traders_en').catch(() => ({})),
-  ]).catch((err) => {
-    names = null;
-    throw err;
-  });
-  return names;
-}
-
 async function loadList(m) {
   const [data, traders, [en, pt, tradersEn]] = await Promise.all([
     getJSON(`${m}/items`),
     getJSON(`${m}/traders`).catch(() => ({})),
-    loadNames(),
+    Promise.all([getOnce('regular/items_en'), getOnce('regular/items_pt').catch(() => ({})), getOnce('regular/traders_en').catch(() => ({}))]),
   ]);
   const traderName = (id) => tradersEn[traders[id]?.name] || 'Comerciante';
   let updated = '';
@@ -103,7 +75,7 @@ async function loadList(m) {
       name,
       short,
       namePt: namePt !== name ? namePt : '',
-      search: ' ' + fold([name, short, namePt, pt[i.shortName]].join(' ')).replace(/[^a-z0-9.]+/g, ' '),
+      search: searchText(name, short, namePt, pt[i.shortName]),
       w: i.width || 1,
       h: i.height || 1,
       icon: safeUrl(i.iconLink),
