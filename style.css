@@ -386,6 +386,10 @@ aside h2 { margin: 2px 0 8px; padding: 0 8px; font-size: 12px; font-weight: 600;
 .who { display: flex; flex-direction: column; min-width: 0; line-height: 1.25; }
 .who-name { font-size: 14px; overflow-wrap: anywhere; }
 .who-state { color: var(--muted); font-size: 11.5px; }
+#people li.unreachable { opacity: .75; }
+#people li.unreachable .avatar { background: var(--fill-hover); color: var(--muted); }
+#people li.unreachable .who-state { color: var(--warn); white-space: nowrap; }
+#people .retry { margin-left: auto; flex-shrink: 0; padding: 3px 10px; border-radius: 999px; font-size: 11.5px; font-weight: 600; color: var(--accent); }
 #people .live {
   margin-left: auto;
   flex-shrink: 0;

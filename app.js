@@ -49,7 +49,13 @@ const tiles = new Map(); // id -> elementos do quadro de vídeo
 
 // Processa mensagens e ações em ordem, para a negociação nunca se atropelar.
 let queue = Promise.resolve();
-const enqueue = (fn) => (queue = queue.then(fn).catch((err) => console.error(err)));
+// Se uma etapa demorar demais (ex.: uma negociação que nunca responde), ela é abandonada e a fila
+// segue; senão quem entrasse depois nunca apareceria.
+const QUEUE_TIMEOUT_MS = 15_000;
+const enqueue = (fn) =>
+  (queue = queue
+    .then(() => Promise.race([fn(), new Promise((_, no) => setTimeout(() => no(new Error('etapa demorou demais')), QUEUE_TIMEOUT_MS))]))
+    .catch((err) => console.warn('fila:', err)));
 
 // ---------- preferências salvas ----------
 function load(key) {
@@ -141,6 +147,10 @@ $('#join').addEventListener('submit', async (e) => {
     sendMyWishlist(peerId);
   };
   room.onPeerLeave = (peerId) => enqueue(() => onPeerLeave(peerId));
+  // Batida de presença: reenvia o estado (8 s) e a wishlist (30 s). Se alguma apresentação se
+  // perder no caminho, a pessoa aparece em segundos em vez de nunca.
+  setInterval(() => sendState(), 8000);
+  setInterval(() => sendMyWishlist(), 30000);
   addEventListener('pagehide', () => room.leave());
 
   people.set(myId, { name: myName, sharing: false, jam: null });
@@ -214,14 +224,28 @@ const signal = (to, data) => sigAction.send(JSON.parse(JSON.stringify(data)), { 
 
 // Nome e "está compartilhando?" de cada um. Enviado ao conhecer alguém e quando muda.
 function sendState(target = null) {
-  stateAction.send({ name: myName, sharing: !!localStream, jam: people.get(myId)?.jam || null }, { target }).catch(() => {});
+  // "roster": quem eu vejo na sala. Serve para os outros saberem de alguém que está na sala mas não
+  // conseguiu se conectar com eles.
+  const roster = [...people].filter(([id]) => id !== myId).slice(0, 20).map(([id, p]) => [id, p.name]);
+  stateAction.send({ name: myName, sharing: !!localStream, jam: people.get(myId)?.jam || null, roster }, { target }).catch(() => {});
 }
+
+// Lista de quem o outro vê, validada (vem de outro PC).
+const PEER_ID_RE = /^[A-Za-z0-9_-]{1,64}$/;
+function cleanRoster(list) {
+  if (!Array.isArray(list)) return [];
+  return list
+    .slice(0, 20)
+    .filter((e) => Array.isArray(e) && typeof e[0] === 'string' && PEER_ID_RE.test(e[0]))
+    .map(([id, name]) => [id, cleanText(name, 32) || 'Anônimo']);
+}
+const recentlyLeft = new Map(); // quem saiu há pouco não aparece como "sem conexão" pelos rosters antigos
 
 async function onState(peerId, data) {
   if (!data || typeof data !== 'object') return; // mensagem estranha de outro PC: ignora
   const isNew = !people.has(peerId);
   // A Jam vem de outro PC: só entra se for mesmo um link do Spotify (validada de novo aqui).
-  people.set(peerId, { name: cleanText(data.name, 32) || 'Anônimo', sharing: !!data.sharing, jam: canonicalJam(data.jam) });
+  people.set(peerId, { name: cleanText(data.name, 32) || 'Anônimo', sharing: !!data.sharing, jam: canonicalJam(data.jam), roster: cleanRoster(data.roster) });
   const tile = tiles.get(peerId);
   if (tile) {
     tile.label.textContent = people.get(peerId).name;
@@ -233,6 +257,7 @@ async function onState(peerId, data) {
 }
 
 function onPeerLeave(peerId) {
+  recentlyLeft.set(peerId, Date.now());
   stateIn.forget(peerId);
   wishIn.forget(peerId);
   people.delete(peerId);
@@ -799,9 +824,44 @@ function renderPeople() {
     }
     ul.append(li);
   }
+  // Quem os outros veem mas eu não: está na sala, mas a conexão direta comigo não se formou.
+  const unreachable = new Map();
+  for (const [id, p] of people) {
+    for (const [rid, rname] of p.roster || []) {
+      const left = recentlyLeft.get(rid);
+      if (rid !== myId && !people.has(rid) && !(left && Date.now() - left < 30000)) unreachable.set(rid, rname);
+    }
+  }
+  for (const [, name] of unreachable) {
+    const li = document.createElement('li');
+    li.className = 'unreachable';
+    const avatar = document.createElement('span');
+    avatar.className = 'avatar';
+    avatar.textContent = (Array.from(name.trim())[0] || '?').toUpperCase();
+    const who = document.createElement('span');
+    who.className = 'who';
+    const n = document.createElement('span');
+    n.className = 'who-name';
+    n.textContent = name;
+    const state = document.createElement('span');
+    state.className = 'who-state';
+    state.textContent = 'sem conexão';
+    li.title = 'Está na sala (os outros veem), mas a conexão direta com você não se formou';
+    who.append(n, state);
+    const retry = document.createElement('button');
+    retry.type = 'button';
+    retry.className = 'retry';
+    retry.textContent = 'Reconectar';
+    retry.title = 'Recarrega a página e entra de novo na sala (a senha e o nome ficam salvos)';
+    retry.addEventListener('click', () => location.reload());
+    li.append(avatar, who, retry);
+    ul.append(li);
+  }
   renderJams();
   renderWishlist(); // os nomes nas listas dos outros vêm daqui
 }
+// Os rosters mudam com o tempo (gente saindo): redesenha de tempos em tempos.
+setInterval(() => room && renderPeople(), 10000);
 
 // Tema claro/escuro. O escuro é o padrão; o <head> do index.html já aplica o tema salvo.
 for (const b of document.querySelectorAll('.theme-toggle')) {
