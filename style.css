@@ -401,6 +401,11 @@ aside h2 { margin: 2px 0 8px; padding: 0 8px; font-size: 12px; font-weight: 600;
   font-weight: 700;
   letter-spacing: .02em;
 }
+#people button.live { cursor: pointer; border: 0; line-height: 1.5; transition: background .15s, color .15s; }
+#people button.live:hover { background: rgba(255, 69, 58, .3); }
+#people button.live.off { background: var(--fill); color: var(--muted); }
+#people button.live.off:hover { background: var(--fill-hover); color: var(--text); }
+.tile[hidden] { display: none; }
 
 /* Spotify Jams (seção expansível na lateral) */
 .jams { margin-top: 12px; padding-top: 10px; border-top: 1px solid var(--line); }

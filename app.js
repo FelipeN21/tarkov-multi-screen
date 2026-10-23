@@ -10,7 +10,7 @@ import { cleanText } from './sanitize.js';
 
 const APP_ID = 'tela-compartilhar-tela-v1';
 // Aparece no rodapé, nos ajustes e no "Sobre": ajuda a saber se o navegador está com a versão nova.
-export const APP_VERSION = '2026.10.20.3';
+export const APP_VERSION = '2026.10.22.1';
 
 // STUN descobre o IP público. Se algum amigo não conseguir conectar (4G, rede de faculdade…),
 // adicione um servidor TURN aqui, por exemplo:
@@ -59,6 +59,8 @@ const people = new Map(); // id -> { name, sharing }
 const sendPcs = new Map(); // id do espectador -> RTCPeerConnection (eu transmitindo)
 const recvs = new Map(); // id de quem transmite -> { pc, sid, stream, tile, prev }
 const tiles = new Map(); // id -> elementos do quadro de vídeo
+const hiddenLives = new Set(); // transmissões que eu escolhi não ver (clique no AO VIVO)
+const pausedBy = new Set(); // quem escolheu não ver a minha: não mando vídeo nem áudio para eles
 
 // Processa mensagens e ações em ordem, para a negociação nunca se atropelar.
 let queue = Promise.resolve();
@@ -307,6 +309,7 @@ async function onState(peerId, data) {
 
 function onPeerLeave(peerId) {
   recentlyLeft.set(peerId, Date.now());
+  pausedBy.delete(peerId);
   stateIn.forget(peerId);
   wishIn.forget(peerId);
   people.delete(peerId);
@@ -497,6 +500,20 @@ async function startSendTo(peerId) {
   await pc.setLocalDescription(await pc.createOffer());
   signal(peerId, { dir: 'toViewer', sid: pc.sid, sdp: pc.localDescription });
   await applyParams(pc);
+  if (pausedBy.has(peerId)) await applyPause(peerId);
+}
+
+// Quem ocultou a minha transmissão: a conexão continua aberta, mas sem enviar nada (economiza a
+// minha internet e a dele). Ao mostrar de novo, o vídeo volta na hora, sem renegociar.
+async function applyPause(peerId) {
+  const pc = sendPcs.get(peerId);
+  if (!pc || !localStream) return;
+  const paused = pausedBy.has(peerId);
+  for (const t of pc.getTransceivers()) {
+    const kind = t.receiver.track?.kind;
+    const track = paused ? null : localStream.getTracks().find((x) => x.kind === kind) || null;
+    if (t.sender.track !== track) await t.sender.replaceTrack(track).catch(() => {});
+  }
 }
 
 // Ajustes do codificador: taxa de bits, 60 fps e o que sacrificar quando a rede apertar.
@@ -575,6 +592,11 @@ async function onSignal(from, data) {
     const r = recvs.get(from);
     if (data.candidate && r?.sid === data.sid) await r.pc.addIceCandidate(data.candidate).catch(() => {});
   } else if (data.dir === 'toSender') {
+    if (typeof data.pause === 'boolean') {
+      if (data.pause) pausedBy.add(from);
+      else pausedBy.delete(from);
+      return applyPause(from);
+    }
     const pc = sendPcs.get(from);
     if (!pc || pc.sid !== data.sid) return; // resposta de uma conexão antiga
     if (data.sdp) await pc.setRemoteDescription({ type: data.sdp.type, sdp: startBitrate(data.sdp.sdp) });
@@ -611,6 +633,33 @@ async function acceptOffer(from, sdp, sid) {
   answer.sdp = stereoOpus(answer.sdp);
   await pc.setLocalDescription(answer);
   signal(from, { dir: 'toSender', sid, sdp: pc.localDescription });
+  if (hiddenLives.has(from)) signal(from, { dir: 'toSender', pause: true });
+}
+
+// Clique no AO VIVO de alguém: some com a tela dessa pessoa (e do PiP) e pede para ela parar de
+// mandar o vídeo para mim. Clicar de novo mostra.
+function toggleLive(id) {
+  const hide = !hiddenLives.has(id);
+  if (hide) hiddenLives.add(id);
+  else hiddenLives.delete(id);
+  signal(id, { dir: 'toSender', pause: hide });
+  const t = tiles.get(id);
+  if (t) {
+    t.el.hidden = hide;
+    if (!hide) t.video.play().catch(() => {});
+  }
+  updateEmpty();
+  refreshPip();
+  renderPeople();
+}
+
+const EMPTY_TEXT = $('#empty').innerHTML;
+function updateEmpty() {
+  const visible = [...tiles.keys()].filter((id) => !hiddenLives.has(id)).length;
+  $('#empty').hidden = visible > 0;
+  // Todas ocultas: explica onde mostrar de novo, em vez de "ninguém está compartilhando".
+  if (tiles.size && !visible) $('#empty').innerHTML = 'Todas as transmissões estão ocultas.<span>Clique em OCULTO na lista de pessoas para ver de novo.</span>';
+  else $('#empty').innerHTML = EMPTY_TEXT;
 }
 
 // O WebRTC começa em ~300 kbps e sobe aos poucos, então os primeiros segundos ficam borrados e
@@ -780,7 +829,8 @@ function makeTile(id, label, withSound) {
   if (id === 'me') $('#grid').append(el);
   else $('#grid').insertBefore(el, tiles.get('me')?.el || null);
   tiles.set(id, t);
-  $('#empty').hidden = true;
+  el.hidden = hiddenLives.has(id);
+  updateEmpty();
   refreshPip();
   return t;
 }
@@ -791,13 +841,13 @@ function removeTile(id) {
   t.video.srcObject = null;
   t.el.remove();
   tiles.delete(id);
-  $('#empty').hidden = tiles.size > 0;
+  updateEmpty();
   refreshPip();
 }
 
 // ---------- PiP (janela por cima dos outros programas) ----------
 function pipScreens() {
-  const list = [...tiles].map(([id, t]) => ({
+  const list = [...tiles].filter(([id]) => !hiddenLives.has(id)).map(([id, t]) => ({
     id,
     name: id === 'me' ? 'Você' : people.get(id)?.name || '?',
     stream: t.video.srcObject,
@@ -865,10 +915,20 @@ function renderPeople() {
     state.textContent = p.sharing ? 'transmitindo' : 'assistindo';
     who.append(name, state);
     li.append(avatar, who);
-    if (p.sharing) {
+    if (p.sharing && id === myId) {
       const live = document.createElement('span');
       live.className = 'live';
       live.textContent = 'AO VIVO';
+      li.append(live);
+    } else if (p.sharing) {
+      const hidden = hiddenLives.has(id);
+      const live = document.createElement('button');
+      live.type = 'button';
+      live.className = 'live' + (hidden ? ' off' : '');
+      live.textContent = hidden ? 'OCULTO' : 'AO VIVO';
+      live.setAttribute('aria-pressed', String(!hidden));
+      live.title = hidden ? 'Mostrar a tela de ' + p.name : 'Ocultar a tela de ' + p.name + ' (ela para de ser enviada para você)';
+      live.addEventListener('click', () => toggleLive(id));
       li.append(live);
     }
     ul.append(li);
