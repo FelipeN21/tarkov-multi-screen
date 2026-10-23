@@ -10,7 +10,7 @@ import { cleanText } from './sanitize.js';
 
 const APP_ID = 'tela-compartilhar-tela-v1';
 // Aparece no rodapé, nos ajustes e no "Sobre": ajuda a saber se o navegador está com a versão nova.
-export const APP_VERSION = '2026.10.22.1';
+export const APP_VERSION = '2026.10.23.1';
 
 // STUN descobre o IP público. Se algum amigo não conseguir conectar (4G, rede de faculdade…),
 // adicione um servidor TURN aqui, por exemplo:
@@ -180,12 +180,73 @@ function rejoinRoom() {
     renderPeople();
   }, 6000);
 }
+// ---------- tela de entrada: senha visível, erros nos campos e transição para a sala ----------
+const EYE_ON = "<path d='M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z'/><circle cx='12' cy='12' r='3'/>";
+const EYE_OFF = "<path d='M10.7 5.1A10 10 0 0 1 12 5c6.4 0 10 7 10 7a17 17 0 0 1-2.2 3.1M6.6 6.6C3.7 8.4 2 12 2 12s3.6 7 10 7a9.7 9.7 0 0 0 5.4-1.6M9.9 9.9a3 3 0 0 0 4.2 4.2M2 2l20 20'/>";
+$('.pw-eye').addEventListener('click', () => {
+  const input = $('#password');
+  const show = input.type === 'password';
+  input.type = show ? 'text' : 'password';
+  const btn = $('.pw-eye');
+  btn.querySelector('svg').innerHTML = show ? EYE_OFF : EYE_ON;
+  btn.setAttribute('aria-pressed', String(show));
+  btn.title = show ? 'Esconder senha' : 'Mostrar senha';
+  btn.setAttribute('aria-label', btn.title);
+  input.focus();
+});
+
+// A cascata de entrada dos campos roda só ao abrir a página (senão recomeçaria ao corrigir um erro).
+setTimeout(() => $('#join').classList.remove('intro'), 1000);
+
+// Campo vazio ou inválido: treme, fica vermelho e diz o que falta (no lugar do balão do navegador).
+function fieldError(input, message) {
+  const label = input.closest('label');
+  label.classList.remove('invalid');
+  void label.offsetWidth; // reinicia a animação se errar de novo
+  label.classList.add('invalid');
+  let msg = label.querySelector('.field-error');
+  if (!msg) {
+    msg = document.createElement('small');
+    msg.className = 'field-error';
+    msg.setAttribute('role', 'alert');
+    label.append(msg);
+  }
+  msg.textContent = message;
+}
+for (const id of ['name', 'room']) {
+  $('#' + id).addEventListener('input', (e) => {
+    const label = e.target.closest('label');
+    label.classList.remove('invalid');
+    label.querySelector('.field-error')?.remove();
+  });
+}
+
+// Espera a animação de saída do cartão (ou desiste em 400 ms, se não houver animação).
+const animationDone = (el) =>
+  new Promise((resolve) => {
+    const done = (e) => {
+      if (e && e.target !== el) return; // fim da animação de um campo de dentro: não é o cartão
+      clearTimeout(t);
+      el.removeEventListener('animationend', done);
+      resolve();
+    };
+    const t = setTimeout(done, 400);
+    el.addEventListener('animationend', done);
+  });
+
 $('#join').addEventListener('submit', async (e) => {
   e.preventDefault();
   if (room) return;
-  myName = cleanText($('#name').value, 32) || 'Anônimo';
   const roomName = roomKey($('#room').value);
-  if (!roomName) return;
+  const missing = [];
+  if (!$('#name').value.trim()) missing.push([$('#name'), 'Digite seu nome.']);
+  if (!roomName) missing.push([$('#room'), 'Digite o nome da sala.']);
+  if (missing.length) {
+    missing.forEach(([input, msg]) => fieldError(input, msg));
+    missing[0][0].focus();
+    return;
+  }
+  myName = cleanText($('#name').value, 32) || 'Anônimo';
   const secret = $('#password').value.trim(); // espaço sem querer no começo/fim não muda a senha
   save('name', myName);
   save('pw:' + roomName, secret);
@@ -193,9 +254,10 @@ $('#join').addEventListener('submit', async (e) => {
 
   // A negociação entre os PCs é criptografada com o nome da sala + a senha. Os relays não
   // conseguem ler, e quem tiver a senha errada não consegue se conectar com ninguém da sala.
-  const joinBtn = $('#join button');
+  const joinBtn = $('#join button[type="submit"]');
   joinBtn.disabled = true;
-  joinBtn.textContent = 'Entrando…';
+  joinBtn.classList.add('loading');
+  joinBtn.innerHTML = '<span class="spinner" aria-hidden="true"></span>Entrando…';
   roomArgs = { password: secret ? await stretchPassword(secret, roomName) : roomName, roomName };
   connectRoom();
   // Batida de presença: reenvia o estado (8 s) e a wishlist (30 s). Se alguma apresentação se
@@ -224,8 +286,14 @@ $('#join').addEventListener('submit', async (e) => {
   $('#roomName').textContent = roomName + (secret ? ' 🔒' : '');
   $('#roomName').title = secret ? 'Sala com senha' : '';
   $('#noPassword').hidden = !!secret;
+  // Transição: o cartão encolhe e some, a barra desce do topo e o resto aparece.
+  document.body.classList.add('joining');
+  await animationDone($('#join'));
   $('#join').hidden = true;
+  $('#app').classList.add('entering');
   $('#app').hidden = false;
+  document.body.classList.remove('joining');
+  setTimeout(() => $('#app').classList.remove('entering'), 900);
   measureTools();
 
   // Ao trocar de aba, o Chrome pode abrir o PiP sozinho (como no Google Meet).

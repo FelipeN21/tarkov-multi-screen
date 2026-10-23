@@ -207,8 +207,56 @@ body:has(#app:not([hidden])) .join-theme { display: none; } /* na sala, o botão
   display: flex;
   flex-direction: column;
   gap: 16px;
-  animation: rise .4s cubic-bezier(.2, .8, .2, 1);
+  animation: card-in .55s cubic-bezier(.2, .8, .2, 1);
 }
+/* 1) Entrada: o cartão sobe e os itens aparecem um depois do outro. */
+.card.intro > * { animation: rise .5s cubic-bezier(.2, .8, .2, 1) both; }
+.card.intro > :nth-child(1) { animation-delay: .08s; }
+.card.intro > :nth-child(2) { animation-delay: .12s; }
+.card.intro > :nth-child(3) { animation-delay: .16s; }
+.card.intro > :nth-child(4) { animation-delay: .2s; }
+.card.intro > :nth-child(5) { animation-delay: .24s; }
+.card.intro > :nth-child(6) { animation-delay: .28s; }
+.card.intro > :nth-child(7) { animation-delay: .32s; }
+.join-footer { animation: rise .5s .36s cubic-bezier(.2, .8, .2, 1) both; }
+@keyframes card-in { from { opacity: 0; transform: translateY(14px) scale(.985); } }
+
+/* 2) Fundo: manchas de cor bem desfocadas, se movendo devagar (só na tela de entrada). */
+.join-bg { position: fixed; inset: 0; z-index: -1; overflow: hidden; pointer-events: none; }
+.join-bg i { position: absolute; width: 46vmax; height: 46vmax; border-radius: 50%; filter: blur(90px); opacity: .32; will-change: transform; }
+.join-bg i:nth-child(1) { background: #0a84ff; left: -12vmax; top: -14vmax; animation: drift-a 22s ease-in-out infinite alternate; }
+.join-bg i:nth-child(2) { background: #5e5ce6; right: -14vmax; top: 10vh; animation: drift-b 26s ease-in-out infinite alternate; }
+.join-bg i:nth-child(3) { background: #0d9488; left: 22vw; bottom: -22vmax; opacity: .2; animation: drift-c 30s ease-in-out infinite alternate; }
+:root[data-theme="light"] .join-bg i { opacity: .2; }
+:root[data-theme="light"] .join-bg i:nth-child(3) { opacity: .14; }
+@keyframes drift-a { to { transform: translate(14vw, 10vh) scale(1.12); } }
+@keyframes drift-b { to { transform: translate(-12vw, 14vh) scale(.92); } }
+@keyframes drift-c { to { transform: translate(10vw, -12vh) scale(1.08); } }
+body:has(#app:not([hidden])) .join-bg { display: none; }
+
+/* 3) Indo para a sala: o cartão encolhe e some; a barra desce e o conteúdo aparece. */
+body.joining .card { animation: card-out .32s cubic-bezier(.4, 0, .2, 1) forwards; }
+body.joining .join-footer, body.joining .join-theme, body.joining .join-bg { transition: opacity .32s; opacity: 0; }
+@keyframes card-out { to { opacity: 0; transform: scale(.94); } }
+#app.entering .bar { animation: bar-in .5s cubic-bezier(.2, .8, .2, 1); }
+#app.entering .layout { animation: rise .55s .12s cubic-bezier(.2, .8, .2, 1) both; }
+@keyframes bar-in { from { opacity: 0; transform: translateY(-100%); } }
+.card button.loading { display: inline-flex; align-items: center; justify-content: center; gap: 9px; opacity: 1; }
+.spinner { width: 15px; height: 15px; border: 2px solid rgba(255, 255, 255, .35); border-top-color: #fff; border-radius: 50%; animation: spin .7s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* 4) Senha com botão de mostrar/esconder. */
+.pw-field { position: relative; display: block; }
+.pw-field input { padding-right: 42px !important; }
+.pw-eye { position: absolute; top: 50%; right: 4px; transform: translateY(-50%); display: grid; place-items: center; width: 32px; height: 32px; padding: 0; border-radius: 8px; background: transparent; color: var(--muted); }
+.pw-eye:hover { color: var(--text); background: var(--fill); }
+.pw-eye .ic { width: 17px; height: 17px; }
+
+/* 5) Campo com erro: treme, borda vermelha e a mensagem embaixo. */
+.card label.invalid input { border-color: var(--danger); box-shadow: 0 0 0 3px rgba(255, 69, 58, .22); }
+.card label.invalid { animation: shake .4s cubic-bezier(.36, .07, .19, .97); }
+.field-error { color: var(--danger); font-size: 12px; font-weight: 500; animation: rise .25s ease-out; }
+@keyframes shake { 20%, 60% { transform: translateX(-6px); } 40%, 80% { transform: translateX(6px); } }
 .brand { display: flex; align-items: center; gap: 14px; margin-bottom: 8px; }
 .card h1 { margin: 0; font-size: 28px; font-weight: 700; line-height: 1.1; letter-spacing: -.022em; }
 .card p { margin: 0; }
@@ -587,6 +635,7 @@ body:has(#app:not([hidden])) #banner { top: 66px; }
 
 @media (prefers-reduced-motion: reduce) {
   *, *::before { animation: none !important; transition: none !important; }
+  .spinner { animation: spin 1.4s linear infinite !important; } /* o "carregando" continua girando, devagar */
 }
 
 @media (max-width: 760px) {

@@ -18,8 +18,9 @@
   <script>try { if (localStorage.getItem('tela:theme') === 'light') document.documentElement.dataset.theme = 'light'; } catch {}</script>
 </head>
 <body>
+  <div class="join-bg" aria-hidden="true"><i></i><i></i><i></i></div>
   <button type="button" class="theme-toggle join-theme" title="Alternar tema claro/escuro" aria-label="Alternar tema claro/escuro"></button>
-  <form id="join" class="card">
+  <form id="join" class="card intro" novalidate>
     <div class="brand">
       <img class="logo" src="logo.svg" alt="">
       <div>
@@ -34,7 +35,10 @@
       <input id="room" maxlength="64" required spellcheck="false">
     </label>
     <label><span>Senha da sala <span class="optional">opcional</span> <span class="tip" title="Com senha, todos precisam digitar a mesma. Ela não vai no link: mande por outro meio."><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx='12' cy='12' r='10'/><path d='M12 16v-4M12 8h.01'/></svg></span></span>
-      <input id="password" type="password" maxlength="64" autocomplete="off" placeholder="Combine com os amigos">
+      <span class="pw-field">
+        <input id="password" type="password" maxlength="64" autocomplete="off" placeholder="Combine com os amigos">
+        <button type="button" class="pw-eye" aria-label="Mostrar senha" aria-pressed="false" title="Mostrar senha"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d='M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z'/><circle cx='12' cy='12' r='3'/></svg></button>
+      </span>
     </label>
     <button class="primary" type="submit">Entrar</button>
     <button type="button" class="diag-open diag-join"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d='M5 12.55a11 11 0 0 1 14.08 0M1.42 9a16 16 0 0 1 21.16 0M8.53 16.11a6 6 0 0 1 6.94 0M12 20h.01'/></svg> Testar minha conexão</button>
