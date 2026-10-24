@@ -10,7 +10,7 @@ import { cleanText } from './sanitize.js';
 
 const APP_ID = 'tela-compartilhar-tela-v1';
 // Aparece no rodapé, nos ajustes e no "Sobre": ajuda a saber se o navegador está com a versão nova.
-export const APP_VERSION = '2026.10.23.1';
+export const APP_VERSION = '2026.10.23.3';
 
 // STUN descobre o IP público. Se algum amigo não conseguir conectar (4G, rede de faculdade…),
 // adicione um servidor TURN aqui, por exemplo:
@@ -309,6 +309,17 @@ $('#join').addEventListener('submit', async (e) => {
   }
 });
 
+// Sair da sala: avisa os outros, para a transmissão e volta para a tela inicial (recarrega a
+// página, que já vem com o nome, a sala e a senha preenchidos para entrar de novo).
+$('#leave').addEventListener('click', async () => {
+  if (localStream && !confirm('Você está transmitindo. Sair da sala vai parar a transmissão. Sair mesmo assim?')) return;
+  stopShare();
+  if (isPipOpen()) closePip();
+  document.body.classList.add('leaving-room');
+  await Promise.all([Promise.resolve(room?.leave()).catch(() => {}), animationDone($('#app'))]);
+  location.reload();
+});
+
 // Cada pessoa pode mandar no máximo uma atualização por segundo de estado (nome, transmissão, Jam)
 // e de wishlist. Se mandar mais, vale só a última: o spam fica de fora, sem perder o estado final.
 // (As mensagens de conexão WebRTC não passam por aqui: elas chegam em rajadas normais.)
@@ -504,8 +515,11 @@ async function startShare() {
   videoTrack.contentHint = $('#mode').value;
   videoTrack.addEventListener('ended', stopShare); // botão "Parar" do próprio navegador
 
+  shareStartedAt = Date.now();
+  $('#selfDock').hidden = false;
   const tile = makeTile('me', 'Você (prévia)', false);
   tile.video.srcObject = new MediaStream([videoTrack]);
+  updateDock();
   refreshPip();
 
   $('#share').textContent = 'Parar de compartilhar';
@@ -528,12 +542,53 @@ function stopShare() {
   for (const id of ['audio', 'extraAudio']) $('#' + id).disabled = false;
   for (const id of [...sendPcs.keys()]) closeSend(id);
   removeTile('me');
+  $('#selfDock').hidden = true;
+  $('#dockStats').textContent = '';
   $('#share').textContent = 'Compartilhar tela';
   $('#share').className = 'primary';
   people.get(myId).sharing = false;
   renderPeople();
   sendState();
 }
+
+// ---------- painel da sua transmissão (canto inferior direito) ----------
+let shareStartedAt = 0;
+const duration = (ms) => {
+  const s = Math.floor(ms / 1000);
+  const h = Math.floor(s / 3600);
+  const m = Math.floor((s % 3600) / 60);
+  const ss = String(s % 60).padStart(2, '0');
+  return h ? `${h}:${String(m).padStart(2, '0')}:${ss}` : `${m}:${ss}`;
+};
+function updateDock() {
+  if (!localStream) return;
+  $('#dockTime').textContent = duration(Date.now() - shareStartedAt);
+  // Assistindo = conexão de vídeo aberta com a pessoa e ela não ocultou a sua tela.
+  const watching = [];
+  const hid = [];
+  for (const [id, pc] of sendPcs) {
+    const name = people.get(id)?.name || '?';
+    if (pausedBy.has(id)) hid.push(name);
+    else if (pc.connectionState === 'connected') watching.push(name);
+  }
+  let text = watching.length === 1 ? '1 assistindo' : `${watching.length} assistindo`;
+  if (hid.length) text += ` · ${hid.length} ocultou`;
+  $('#dockViewers').textContent = text;
+  $('#dockViewers').title = [
+    watching.length ? 'Assistindo: ' + watching.join(', ') : 'Ninguém assistindo ainda',
+    hid.length ? 'Ocultaram a sua tela: ' + hid.join(', ') : '',
+  ].filter(Boolean).join('\n');
+}
+setInterval(updateDock, 1000);
+
+function setDockOpen(open) {
+  $('#selfDock').classList.toggle('collapsed', !open);
+  $('#dockToggle').setAttribute('aria-expanded', String(open));
+  $('#dockToggle').title = open ? 'Recolher a prévia' : 'Mostrar a prévia';
+  save('dockOpen', open ? '1' : '0');
+}
+setDockOpen(load('dockOpen') !== '0');
+$('#dockToggle').addEventListener('click', () => setDockOpen($('#selfDock').classList.contains('collapsed')));
 
 async function startSendTo(peerId) {
   if (!localStream) return;
@@ -723,10 +778,12 @@ function toggleLive(id) {
 
 const EMPTY_TEXT = $('#empty').innerHTML;
 function updateEmpty() {
-  const visible = [...tiles.keys()].filter((id) => !hiddenLives.has(id)).length;
+  const friends = [...tiles.keys()].filter((id) => id !== 'me');
+  const visible = friends.filter((id) => !hiddenLives.has(id)).length;
   $('#empty').hidden = visible > 0;
   // Todas ocultas: explica onde mostrar de novo, em vez de "ninguém está compartilhando".
-  if (tiles.size && !visible) $('#empty').innerHTML = 'Todas as transmissões estão ocultas.<span>Clique em OCULTO na lista de pessoas para ver de novo.</span>';
+  if (friends.length && !visible) $('#empty').innerHTML = 'Todas as transmissões estão ocultas.<span>Clique em OCULTO na lista de pessoas para ver de novo.</span>';
+  else if (tiles.has('me')) $('#empty').innerHTML = 'Você está transmitindo.<span>Sua prévia fica no canto. Quando um amigo compartilhar, a tela dele aparece aqui.</span>';
   else $('#empty').innerHTML = EMPTY_TEXT;
 }
 
@@ -812,6 +869,10 @@ async function senderStats() {
   if (!me) return;
   const lines = [];
   for (const [id, pc] of sendPcs) {
+    if (pausedBy.has(id)) {
+      lines.push(`→ ${people.get(id)?.name || '?'}: ocultou (nada enviado)`);
+      continue;
+    }
     const stats = await pc.getStats().catch(() => null);
     let out;
     stats?.forEach((s) => {
@@ -827,7 +888,7 @@ async function senderStats() {
     if (out.powerEfficientEncoder === false) parts.push('codificando no processador');
     lines.push(parts.join(' · '));
   }
-  me.stats.textContent = lines.join('\n');
+  $('#dockStats').textContent = lines.join('\n');
 }
 
 // ---------- interface ----------
@@ -894,8 +955,9 @@ function makeTile(id, label, withSound) {
   t.video.addEventListener('resize', fitAspect);
 
   // A prévia local fica por último; telas dos amigos primeiro.
-  if (id === 'me') $('#grid').append(el);
-  else $('#grid').insertBefore(el, tiles.get('me')?.el || null);
+  // A sua prévia fica no canto (selfDock); as telas dos amigos ficam na grade.
+  if (id === 'me') $('#dockBody').prepend(el);
+  else $('#grid').append(el);
   tiles.set(id, t);
   el.hidden = hiddenLives.has(id);
   updateEmpty();

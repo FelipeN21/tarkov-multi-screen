@@ -58,6 +58,7 @@
       </div>
       <span id="noPassword" class="warn" title="Quem souber o nome da sala entra e vê sua tela. Para usar senha, recarregue a página e preencha o campo Senha." hidden><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d='M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z'/><path d='M12 9v4M12 17h.01'/></svg> Sem senha</span>
       <button id="copy" type="button" class="ghost icon-btn" title="Copiar o link da sala" aria-label="Copiar o link da sala"></button>
+      <button id="leave" type="button" class="ghost icon-btn" title="Sair da sala e voltar para a tela inicial" aria-label="Sair da sala"></button>
       <div class="spacer"></div>
       <nav class="toolgroup" aria-label="Ferramentas do Escape from Tarkov">
         <button id="toolsToggle" type="button" class="toolgroup-label" aria-expanded="true" aria-controls="toolsItems" title="Mostrar/ocultar as ferramentas do Tarkov">Tarkov</button>
@@ -295,6 +296,19 @@
       </section>
     </div>
   </main>
+
+  <!-- Sua transmissão: prévia pequena no canto, com tempo ao vivo e quem está assistindo. -->
+  <div id="selfDock" class="self-dock" role="region" aria-label="Sua transmissão" hidden>
+    <div class="dock-head">
+      <span class="dock-live">AO VIVO</span>
+      <span id="dockTime" class="dock-time">0:00</span>
+      <span id="dockViewers" class="dock-viewers"></span>
+      <button id="dockToggle" type="button" class="dock-btn" aria-expanded="true" aria-controls="dockBody" title="Recolher a prévia"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d='m6 9 6 6 6-6'/></svg></button>
+    </div>
+    <div id="dockBody" class="dock-body">
+      <p id="dockStats" class="dock-stats"></p>
+    </div>
+  </div>
 
   <div id="banner" role="status" hidden></div>
 
